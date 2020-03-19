@@ -10,6 +10,8 @@
  *               embedded software development environment.
  */
 
+//cgl
+
 #include "../inc/dataCorruptor.h"
 
 int main()
