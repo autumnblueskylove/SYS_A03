@@ -14,7 +14,7 @@
 
 #include "../inc/dataCorruptor.h"
 
-int main()
+int main() 
 {
     int i = 1;
     
