@@ -32,7 +32,7 @@ typedef struct                                      // related to a message queu
 	int msgStatus;
 } MessageData;
 
-const char kDescriptionStatus[NUM_STATUS] = {       // description of the client's status
+const char kDescriptionStatus[NUM_STATUS][40] = {       // description of the client's status
     "Everything is OKAY",
     "Hydraulic Pressure Failure",
     "Safety Button Failure",
