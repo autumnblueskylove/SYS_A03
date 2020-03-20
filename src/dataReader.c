@@ -18,6 +18,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
+#include <time.h>
 #include "../inc/dataReader.h"
 
 int main (void)
@@ -29,6 +30,7 @@ int main (void)
     MessageStatus   eMsgStatus;
     MessageData 	sMsgData;
 	MasterList      *pMasterList;
+    struct tm*      localTime;  
 	int             counter = 0;
 	    
     // initialization 
@@ -47,7 +49,7 @@ int main (void)
 	{
 		printf ("(SERVER) No queue available, create!\n");
 
-		queueID = msgget (message_key, IPC_CREAT | 0660);
+		queueID = msgget (messageKey, IPC_CREAT | 0660);
 		if (queueID == FAILURE) 
 		{
 			printf ("(SERVER) Cannot allocate a new queue!\n");
@@ -95,15 +97,27 @@ int main (void)
 	    pMasterList->dc[counter].lastTimeHeardFrom = 0;
 	}
 
+    // Waiting after allocating the resources
+    sleep(15);
+
     // MAIN LOOP
     while(1) 
     {
         // msgrcv, the first message on the queue shall be received
-		if ((msgrcv (queueId, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
+		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
         {
             // ERROR
             break;
         }
+
+        //sMsgData.msgStatus
+        //sMsgData.msgType
+
+  
+        // Get the localtime 
+        time_t t = time(NULL);
+        localTime = localtime(&t); 
+        printf("Local time and date: %s\n", asctime(localTime)); 
 
         if(eMsgStatus != OK)
         {
