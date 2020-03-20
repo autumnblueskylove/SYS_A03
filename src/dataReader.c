@@ -22,13 +22,54 @@
 #include <time.h>
 #include "../inc/dataReader.h"
 
-void OperationIncomming(int orderCurrentClient, MasterList *pMasterList, MessageData sMsgData, time_t t)
+int RemoveAndCollapse(int orderIncomingClient, MasterList *pMasterList, bool flagRemovedAll)
 {
-	if(orderCurrentClient == 0)					// new client
+	for(int i=(orderIncomingClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  // all element except for the last one
+	{
+		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
+		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
+	}
+
+	pMasterList->numberOfDCs--;
+	if(pMasterList->numberOfDCs < 0)
+	{
+		//ERROR
+		return -11;
+	}
+	else if(pMasterList->numberOfDCs == 0)
+	{
+		flagRemovedAll = true;			// all elements removed
+		//log2: TERMINATING
+	}
+}
+
+void OperationNonResponsive(int orderNonResponsiveClient, MasterList *pMasterList, bool flagRemovedAll)
+{
+	time_t t;
+	while(orderNonResponsiveClient != 0)						// if there is a time outed client or more
+	{
+		// seach for the client
+		for(int i=0; i < pMasterList->numberOfDCs; i++)
+		{
+
+			t = time(NULL);
+			if( (t - pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom) > 35)     //more than 35 seconds
+			{
+				orderNonResponsiveClient = i + 1;
+			} 
+		}
+		// log1: non-responsive
+		RemoveAndCollapse(orderNonResponsiveClient, pMasterList, flagRemovedAll);
+	}
+}
+
+void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, MessageData sMsgData, time_t t)
+{
+	if(orderIncomingClient == 0)					// new client
 	{
 		//add
-		pMasterList->dc[orderCurrentClient].dcProcessID = sMsgData.msgType;
-		pMasterList->dc[orderCurrentClient].lastTimeHeardFrom = t;
+		pMasterList->dc[orderIncomingClient].dcProcessID = sMsgData.msgType;
+		pMasterList->dc[orderIncomingClient].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
 		//log
 	}
@@ -44,8 +85,8 @@ void OperationIncomming(int orderCurrentClient, MasterList *pMasterList, Message
 		else									// status 1 ~ 5
 		{
 			//update
-			pMasterList->dc[orderCurrentClient - 1].dcProcessID = sMsgData.msgType;
-			pMasterList->dc[orderCurrentClient - 1].lastTimeHeardFrom = t;
+			pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.msgType;
+			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
 			//log
 		}
 	}
@@ -62,12 +103,14 @@ int main (void)
 	MasterList      *pMasterList;
 	time_t 			t;
     struct tm*      localTime;  
-	int 			orderCurrentClient = 0;			// the order of the current incomming client in the list
-	int 			orderTimeOutClient = 0;  		// the order of the time ounted client in the list
+	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
+	int 			orderNonResponsiveClient = 0;  		// the order of the time ounted client in the list
 	bool			flagRemovedAll = false;
 	int             counter = 0;
 	    
     // initialization 
+	sMsgData.msgStatus = 0;
+	sMsgData.msgType = 0;
 
     // MESSAGE QUEUE
     messageKey = ftok (".", 1234);                  // same message key as server
@@ -132,16 +175,19 @@ int main (void)
 	}
 
     // Waiting after allocating the resources
+	printf("stop watch: start, 2 seconds\n");
     //sleep(15);
+    sleep(2);
 	
 
+int j = 0;
     // MAIN LOOP
     while(flagRemovedAll == false) 
     {
 		// initialization
 		t = 0;
-		orderCurrentClient = 0;
-		orderTimeOutClient = 0;
+		orderIncomingClient = 0;
+		orderNonResponsiveClient = 0;
 
         // msgrcv, the first message on the queue shall be received
 		//if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
@@ -170,58 +216,26 @@ int main (void)
 		{
 			if(sMsgData.msgType == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
 			{
-				orderCurrentClient = i + 1;
+				orderIncomingClient = i + 1;
 			}
 		}
 
-		//1st operation
-		OperationIncomming(orderCurrentClient, pMasterList, sMsgData, t);
+		//1st operation, processing incomming messages
+		OperationIncomming(orderIncomingClient, pMasterList, sMsgData, t);
 
-//2nd operation
-		//if absent during more than 35 seconds, 
+		//2nd operation, checking if th during more than 35 seconds
+		OperationNonResponsive(orderNonResponsiveClient, pMasterList, flagRemovedAll);
 
-		while(orderTimeOutClient != 0)						// if there is a time outed client or more
+		//3rd operation
+		if(sMsgData.msgStatus == OFF_LINE)
 		{
-			// seach for the client
-			for(int i=0; i < pMasterList->numberOfDCs; i++)
-			{
-
-				t = time(NULL);
-				if( (t - pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom) > 35)     //more than 35 seconds
-				{
-					orderTimeOutClient = i + 1;
-				} 
-			}
-			//remove()
-			// log1: non-responsive
-				//remove() - collapsing
+			RemoveAndCollapse(orderIncomingClient, pMasterList, flagRemovedAll);
+			//log1: offline
 		}
 
-//3rd operation
-		//if status 6,
-		//remove
-		//log1: offline
-			//remove() - collapsing
-			for(int i=(orderCurrentClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  // all element except for the last one
-			{
-				pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
-				pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
-			}
-
-			pMasterList->numberOfDCs--;
-			if(pMasterList->numberOfDCs < 0)
-			{
-				//ERROR
-				return -11;
-			}
-			else if(pMasterList->numberOfDCs == 0)
-			{
-				flagRemovedAll = true;			// all elements removed
-				//log2: TERMINATING
-			}
-
-//4th operation
-	//usleep(1.5 * 1000);    					// 1.5 seconds
+		//4th operation
+			printf("stop watch[%d]: 1.5 seconds\n", j++);
+			usleep(1.5 * 1000000);    					// 1.5 seconds
     }
 
 	// release the queue

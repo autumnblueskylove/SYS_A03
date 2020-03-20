@@ -16,9 +16,6 @@
 #define MAX_DC_ROLES             10     // the maximum number of clients
 #define FAILURE                  -1
 
-//debug
-#define     p(x)    printf(x)
-
 typedef enum
 {
     OK,                                             // means Everything is OKAY

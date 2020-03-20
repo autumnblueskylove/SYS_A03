@@ -73,5 +73,6 @@ unsigned short init_values[1] = { 1 };
  * =========================================================================== */
 extern struct sembuf acquire_operation;
 extern struct sembuf release_operation;
+unsigned short init_values[1] = { 1 };
 
 #endif
