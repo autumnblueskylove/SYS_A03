@@ -11,15 +11,63 @@
  * 
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
 #include "../inc/dataCreator.h"
 
-
-
-int main()
+int main (void)
 {
-    int i = 2;
-    
-    printf("dataCreator: %d\n", i);
-    
-    return (0);
+	pid_t		processID;
+	key_t	 	messageKey;
+	int 		queueID;                            // message queue ID
+    MessageStatus   eMsgStatus;
+	MessageData 	sMsgData;
+
+    // initialization
+    eMsgStatus = OK;
+    sMsgData.msgStatus = eMsgStatus;
+
+	processID = getpid();                           // used as the machine's ID value
+	printf ("(CLIENT) My PID is %d\n", processID);
+    sMsgData.msgType = processID;                    // using the process id as the msgType field
+	messageKey = ftok (".", 1234);                  // same message key as server
+
+	if (messageKey == FAILURE) 
+	{ 
+	    printf ("ERROR: cannot allocate a message key\n");
+	    return -1;
+	}
+
+	printf("LOOP: checking for message queue\n");
+	while ((queueID = msgget (messageKey, 0)) == FAILURE) 
+	{
+        sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
+	}
+	printf ("(CLIENT) The queue ID is %d\n", queueID);
+
+    printf("LOOP: sending messages");
+	while(eMsgStatus != OFF_LINE)
+	{
+        if (msgsnd (queueID, (void *)&sMsgData, sizeof(int), 0) == FAILURE) 
+        {
+            printf ("ERROR: cannot send a message\n");
+            return -2;
+        }
+        printf("SUCCESS: a message sent\n");
+
+        if(eMsgStatus != OK)
+        {
+            eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
+            sMsgData.msgStatus = eMsgStatus;
+            // sleep((rand() % 21) + 10);              // integer: 10 to 30
+            int i = ((rand() % 21) + 10);              // integer: 10 to 30
+            sleep(i);              // integer: 10 to 30
+        }
+	}
+	return 0;
 }
