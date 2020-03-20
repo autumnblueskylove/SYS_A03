@@ -15,6 +15,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <signal.h>
+#include <unistd.h>
 
 #define     MAX_DC_ROLES    10
 
