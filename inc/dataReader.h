@@ -10,10 +10,21 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <time.h>
 
 #define MAX_DC_ROLES    10
 
 typedef struct
 {
-    pid_t dcProcessID;
-};
+    pid_t   dcProcessID;
+    time_t  lastTimeHeardFrom;
+} DCInfo;
+
+typedef struct
+{
+    int     msgQueueID;
+    int     numberOfDCs;
+    DCInfo  dc[MAX_DC_ROLES];
+} MasterList;
+
