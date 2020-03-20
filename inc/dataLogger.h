@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
+#include <time.h>
 
 #ifndef __DATA_LOGGER_H__
 #define __DATA_LOGGER_H__

@@ -42,7 +42,9 @@ int main ()
 void dlog(int progID, int semid, char *contents)
 {
     char filePath[255] = {""};
-    FILE *fp;
+    time_t 		    t;
+    FILE            *fp;
+    struct tm*      localTime; 
 
 
     // get semaphore ID
@@ -76,7 +78,15 @@ void dlog(int progID, int semid, char *contents)
         semctl ( semid, 0, IPC_RMID);
         exit (2);
     }
-    fprintf(fp,"%s",contents);
+
+    //Time stamp for log file
+    t = time(NULL);
+    localTime = localtime(&t); 
+    //printf("Local time and date: %s\n", asctime(localTime)); 
+    fprintf(fp,"[%d-%d-%d %d:%d:%d] : ", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
+
+
+    fprintf(fp,"%s\n",contents);
     fclose(fp);
 
     if(semop(semid, &release_operation,1) == -1)
