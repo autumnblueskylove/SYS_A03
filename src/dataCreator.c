@@ -24,7 +24,7 @@ int main (void)
 {
 	pid_t		processID;
 	key_t	 	messageKey;
-	int 		queueID;                            // message queue ID
+	int 		queueID = -1;                       // message queue ID
     MessageStatus   eMsgStatus;
 	MessageData 	sMsgData;
 
@@ -34,7 +34,8 @@ int main (void)
 
 	processID = getpid();                           // used as the machine's ID value
 	printf ("(CLIENT) My PID is %d\n", processID);
-    sMsgData.msgType = processID;                    // using the process id as the msgType field
+    sMsgData.msgType = processID;                   // using the process id as the msgType field
+    
 	messageKey = ftok (".", 1234);                  // same message key as server
 
 	if (messageKey == FAILURE) 
@@ -48,7 +49,7 @@ int main (void)
 	{
         sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
 	}
-	printf ("(CLIENT) The queue ID is %d\n", queueID);
+	printf ("(CLIENT) The message queue ID is %d\n", queueID);
 
     printf("LOOP: sending messages");
 	while(eMsgStatus != OFF_LINE)

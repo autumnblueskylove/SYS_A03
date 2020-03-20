@@ -11,8 +11,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define     TIME_INTERVAL_CHECK_QUEUE   10          // to check for message queue
-#define     FAILURE                     -1
+#define TIME_INTERVAL_CHECK_QUEUE       10          // to check for message queue
+#define NUM_STATUS                      7           // for the description of the status
+#define FAILURE                         -1
 
 typedef enum
 {
@@ -25,8 +26,18 @@ typedef enum
     OFF_LINE                                        // means Machine is Off-line
 } MessageStatus;
 
-typedef struct
+typedef struct                                      // related to a message queue structure
 {
     long msgType;
 	int msgStatus;
 } MessageData;
+
+const char kDescriptionStatus[NUM_STATUS] = {       // description of the client's status
+    "Everything is OKAY",
+    "Hydraulic Pressure Failure",
+    "Safety Button Failure",
+    "No Raw Material in the Process",
+    "Operating Temperature Out of Range",
+    "Operator Error",
+    "Machine is Off-line"
+};

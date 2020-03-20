@@ -13,7 +13,8 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define MAX_DC_ROLES    10
+#define MAX_DC_ROLES             10     // the maximum number of clients
+#define FAILURE                  -1
 
 typedef struct
 {
@@ -21,10 +22,9 @@ typedef struct
     time_t  lastTimeHeardFrom;
 } DCInfo;
 
-typedef struct
+typedef struct                          // related to a shared memory structure
 {
     int     msgQueueID;
     int     numberOfDCs;
     DCInfo  dc[MAX_DC_ROLES];
 } MasterList;
-
