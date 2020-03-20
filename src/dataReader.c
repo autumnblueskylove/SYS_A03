@@ -22,6 +22,35 @@
 #include <time.h>
 #include "../inc/dataReader.h"
 
+void OperationIncomming(int orderCurrentClient, MasterList *pMasterList, MessageData sMsgData, time_t t)
+{
+	if(orderCurrentClient == 0)					// new client
+	{
+		//add
+		pMasterList->dc[orderCurrentClient].dcProcessID = sMsgData.msgType;
+		pMasterList->dc[orderCurrentClient].lastTimeHeardFrom = t;
+		pMasterList->numberOfDCs++;
+		//log
+	}
+	else										// known client
+	{
+		if(sMsgData.msgStatus == OFF_LINE)		// status 6
+		{
+			//last element
+			pMasterList->dc[pMasterList->numberOfDCs].dcProcessID =0;
+			pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = 0;
+			//log
+		}
+		else									// status 1 ~ 5
+		{
+			//update
+			pMasterList->dc[orderCurrentClient - 1].dcProcessID = sMsgData.msgType;
+			pMasterList->dc[orderCurrentClient - 1].lastTimeHeardFrom = t;
+			//log
+		}
+	}
+}
+
 int main (void)
 {
     key_t	 	    messageKey;						// key for a message queue
@@ -62,8 +91,6 @@ int main (void)
 		}
 	}
 	printf ("(SERVER) The message queue ID is %d\n", queueID);
-	pMasterList->msgQueueID = queueID;
-
 
     // SHARED MEMORY
 	shmKey = ftok (".", 16535);                     // for shared memory
@@ -117,7 +144,8 @@ int main (void)
 		orderTimeOutClient = 0;
 
         // msgrcv, the first message on the queue shall be received
-		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
+		//if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
+		if (0)
         {
             // ERROR
             break;
@@ -126,9 +154,8 @@ int main (void)
 		{
 			// Get the localtime 
 			t = time(NULL);
-			localTime = localtime(&t); 
-			printf("Local time and date: %s\n", asctime(localTime)); 
-			printf("[%d-%d-%d %d:%d:%d] : DDDD\n", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
+			// localTime = localtime(&t); 
+			// printf("[%d-%d-%d %d:%d:%d] : DDDD\n", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
 
 			//sMsgData.msgStatus
 			//sMsgData.msgType
@@ -147,32 +174,9 @@ int main (void)
 			}
 		}
 
-//1st operation
-		if(orderCurrentClient = 0)					// new client
-		{
-			//add
-			pMasterList->dc[orderCurrentClient].dcProcessID = sMsgData.msgType;
-			pMasterList->dc[orderCurrentClient].lastTimeHeardFrom = t;
-			pMasterList->numberOfDCs++;
-			//log
-		}
-		else										// known client
-		{
-			if(sMsgData.msgStatus == OFF_LINE)		// status 6
-			{
-				//last element
-				pMasterList->dc[pMasterList->numberOfDCs].dcProcessID =0;
-				pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = 0;
-				//log
-			}
-			else									// status 1 ~ 5
-			{
-				//update
-				pMasterList->dc[orderCurrentClient - 1].dcProcessID = sMsgData.msgType;
-				pMasterList->dc[orderCurrentClient - 1].lastTimeHeardFrom = t;
-				//log
-			}
-		}
+		//1st operation
+		OperationIncomming(orderCurrentClient, pMasterList, sMsgData, t);
+
 //2nd operation
 		//if absent during more than 35 seconds, 
 
