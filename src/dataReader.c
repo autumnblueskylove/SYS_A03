@@ -175,11 +175,12 @@ int main (void)
 	}
 
     // Waiting after allocating the resources
-	p("stop watch: start, 15 seconds\n");
-    sleep(15);
-	p("stop watch: finish, 0 seconds\n");
+	printf("stop watch: start, 2 seconds\n");
+    //sleep(15);
+    sleep(2);
 	
 
+int j = 0;
     // MAIN LOOP
     while(flagRemovedAll == false) 
     {
@@ -233,9 +234,8 @@ int main (void)
 		}
 
 		//4th operation
-			p("stop watch: start, 1.5 seconds\n");
-			usleep(1.5 * 1000);    					// 1.5 seconds
-			p("stop watch: finish, 0 seconds\n");
+			printf("stop watch[%d]: 1.5 seconds\n", j++);
+			usleep(1.5 * 1000000);    					// 1.5 seconds
     }
 
 	// release the queue
