@@ -22,28 +22,30 @@
 #include <time.h>
 #include "../inc/dataReader.h"
 
-int RemoveAndCollapse(int orderIncomingClient, MasterList *pMasterList, bool flagRemovedAll)
+int RemoveAndCollapse(int orderIncomingClient, MasterList *pMasterList)
 {
-	for(int i=(orderIncomingClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  // all element except for the last one
+	// all element except for the last one
+	for(int i=(orderIncomingClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
 	{
 		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
 		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
 	}
 
-	pMasterList->numberOfDCs--;
+	// the last one
+	pMasterList->dc[pMasterList->numberOfDCs -1].dcProcessID =	0;
+	pMasterList->dc[pMasterList->numberOfDCs -1].lastTimeHeardFrom = 0;
+
+	// decrease in the total number of whole clients
+	pMasterList->numberOfDCs--;						
+
 	if(pMasterList->numberOfDCs < 0)
 	{
-		//ERROR
+		//ERROR: unknown
 		return -11;
-	}
-	else if(pMasterList->numberOfDCs == 0)
-	{
-		flagRemovedAll = true;			// all elements removed
-		//log2: TERMINATING
 	}
 }
 
-void OperationNonResponsive(int orderNonResponsiveClient, MasterList *pMasterList, bool flagRemovedAll)
+void OperationNonResponsive(int orderNonResponsiveClient, MasterList *pMasterList)
 {
 	time_t t;
 	while(orderNonResponsiveClient != 0)						// if there is a time outed client or more
@@ -59,7 +61,7 @@ void OperationNonResponsive(int orderNonResponsiveClient, MasterList *pMasterLis
 			} 
 		}
 		// log1: non-responsive
-		RemoveAndCollapse(orderNonResponsiveClient, pMasterList, flagRemovedAll);
+		RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
 	}
 }
 
@@ -68,24 +70,23 @@ void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, Messag
 	if(orderIncomingClient == 0)					// new client
 	{
 		//add
-		pMasterList->dc[orderIncomingClient].dcProcessID = sMsgData.processID;
-		pMasterList->dc[orderIncomingClient].lastTimeHeardFrom = t;
+		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
+		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
 		//log
 	}
-	else										// known client
+	else											// recored client
 	{
-		if(sMsgData.msgStatus == OFF_LINE)		// status 6
+		if(sMsgData.msgStatus == OFF_LINE)			// status 6
 		{
-			//last element
-			pMasterList->dc[pMasterList->numberOfDCs].dcProcessID =0;
-			pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = 0;
+			//remove
+			RemoveAndCollapse(orderIncomingClient, pMasterList);
 			//log
 		}
-		else									// status 1 ~ 5
+		else										// status 1 ~ 5
 		{
 			//update
-			pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.processID;;
+			// pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.processID;;
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
 			//log
 		}
@@ -105,7 +106,6 @@ int main (void)
     struct tm*      localTime;  
 	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
 	int 			orderNonResponsiveClient = 0;  		// the order of the time ounted client in the list
-	bool			flagRemovedAll = false;
 	int             counter = 0;
 	    
     // initialization 
@@ -179,11 +179,9 @@ int main (void)
 	printf("stop watch: start, 2 seconds\n");
     //sleep(15);
     sleep(2);
-	
 
-int j = 0;
     // MAIN LOOP
-    while(flagRemovedAll == false) 
+    while(LOOP_FOREVER) 
     {
 		// initialization
 		t = 0;
@@ -202,7 +200,7 @@ int j = 0;
 			t = time(NULL);
 		}
 		
-		// seach for the client of the same message type
+		// seach for the client of the same process id
 		for(int i=0; i < pMasterList->numberOfDCs; i++)
 		{
 			if(sMsgData.processID == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
@@ -211,22 +209,21 @@ int j = 0;
 			}
 		}
 
-		//1st operation, processing incomming messages
+		//1st operation, processing an incomming message
 		OperationIncomming(orderIncomingClient, pMasterList, sMsgData, t);
 
-		//2nd operation, checking if th during more than 35 seconds
-		OperationNonResponsive(orderNonResponsiveClient, pMasterList, flagRemovedAll);
+		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
+		OperationNonResponsive(orderNonResponsiveClient, pMasterList);
 
-		//3rd operation
-		if(sMsgData.msgStatus == OFF_LINE)
+		//3rd operation, checking if all clients are removed from the list
+		if(pMasterList->numberOfDCs == 0)
 		{
-			RemoveAndCollapse(orderIncomingClient, pMasterList, flagRemovedAll);
-			//log1: offline
+			//log: The total number of machines reaches zero, then TERMINATING
+			break;
 		}
 
-		//4th operation
-			printf("stop watch[%d]: 1.5 seconds\n", j++);
-			usleep(1.5 * 1000000);    					// 1.5 seconds
+		//4th operation, being suspended for a while before going back to check new message
+		usleep(1.5 * MICRO_SECOND);    					// 1.5 seconds
     }
 
 	// release the queue

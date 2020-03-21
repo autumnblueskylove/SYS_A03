@@ -13,9 +13,12 @@
 #include <sys/types.h>
 #include <time.h>
 
+#define LOOP_FOREVER                    1           // for an infinite loop
 #define MSG_TYPE                        1234        // for message queue
 #define MAX_DC_ROLES                    10          // the maximum number of clients
 #define FAILURE                         -1
+#define MICRO_SECOND                    1000000
+
 
 typedef enum
 {
