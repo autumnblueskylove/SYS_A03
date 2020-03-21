@@ -166,7 +166,7 @@ int main (void)
 	}
 
 	// initialize the data of the shared memory our data to blanks
-    // pMasterList->msgQueueID = 0;
+    pMasterList->msgQueueID = queueID;
     // pMasterList->numberOfDCs = 0;
     
 	// for (counter = 0; counter < MAX_DC_ROLES; counter++) 
