@@ -18,12 +18,11 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
+#include <sys/sem.h>
+#include "../inc/dataCreator.h"
 #include "../inc/msgQueue.h"
 #include "../inc/dataLogger.h"
 #include "../inc/debug.h"
-
-#define LOOP_FOREVER                    1           // for an infinite loop
-#define FAILURE                         -1
 
 int main (void)
 {
@@ -49,13 +48,30 @@ int main (void)
 	    return -1;
 	}
 
-	printf("LOOP: checking for message queue\n");
+	printf("(CLIENT) checking for message queue, 1 second\n");
 	while((queueID = msgget (messageKey, 0)) == FAILURE) 
 	{
         //sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
         sleep(1);
 	}
 	printf ("(CLIENT) The message queue ID is %d\n", queueID);
+
+
+// get semaphore ID
+    int semid;
+    semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
+    if(semid == -1)
+    {
+        printf("(Logger) Cannot get semid\n");
+        exit(1);
+    }
+    printf ("(Logger) semID is %d\n", semid);
+    if(semctl(semid, 0, SETALL, init_values) == -1)
+    {
+         printf("(Logger) Cannot initialize semid\n");
+        exit(2);
+    }
+
 
 	while(LOOP_FOREVER)                             // MAIN LOOP
 	{
@@ -65,6 +81,11 @@ int main (void)
             return -2;
         }
         dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+        // logging the activity of sending a message
+        char log[200];
+        sprintf (log, "DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+        dlog(DATA_CREATOR, semid, log);
+
     
         if(eMsgStatus != OFF_LINE)
         {

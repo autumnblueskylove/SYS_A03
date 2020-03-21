@@ -50,7 +50,7 @@ int main (void)
 	    return -1;
 	}
 
-    printf("SERVER: checking for message queue\n");
+    printf("(SERVER) checking for message queue\n");
 	if ((queueID = msgget (messageKey, 0)) == FAILURE) 
 	{
 		printf ("(SERVER) No queue available, create!\n");
@@ -102,7 +102,7 @@ int main (void)
 	}
 
     // Waiting after allocating the resources
-	printf("stop watch: start, 2 seconds\n");
+	printf("... Waiting after allocating the resources, 2 seconds\n");
     //sleep(15);										// 15 seconds
     sleep(2);
 
