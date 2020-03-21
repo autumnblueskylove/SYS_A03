@@ -105,7 +105,7 @@ void dlog(int progID, int semid, char contents[255])
     t = time(NULL);
     localTime = localtime(&t); 
     //printf("Local time and date: %s\n", asctime(localTime)); 
-    fprintf(fp,"[%d-%d-%d %d:%d:%d] : ", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
+    fprintf(fp,"[%4d-%2d-%2d %2d:%2d:%2d] : ", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
 
     // write log message
     fprintf(fp,"%s\n",contents);

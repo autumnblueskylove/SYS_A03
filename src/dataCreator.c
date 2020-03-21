@@ -84,6 +84,7 @@ int main (void)
         // logging the activity of sending a message
         char log[200];
         sprintf (log, "DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+        printf ("DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
         dlog(DATA_CREATOR, semid, log);
 
     
