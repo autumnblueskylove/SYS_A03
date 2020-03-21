@@ -191,7 +191,7 @@ int j = 0;
 		orderNonResponsiveClient = 0;
 
         // a message on the queue shall be received
-		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), MSG_TYPE, 0)) == FAILURE)
+		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), MSG_TYPE, 1)) == FAILURE)
         {
             // ERROR
             break;
