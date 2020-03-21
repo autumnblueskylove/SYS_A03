@@ -55,6 +55,7 @@ int main (void)
     printf("LOOP: sending messages");
 	while(eMsgStatus != OFF_LINE)
 	{
+        sMsgData.msgStatus = eMsgStatus;
         if (msgsnd (queueID, (void *)&sMsgData, sizeof(int), 0) == FAILURE) 
         {
             printf ("ERROR: cannot send a message\n");
@@ -62,12 +63,15 @@ int main (void)
         }
         printf("SUCCESS: a message sent\n");
 
-        eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
-        sMsgData.msgStatus = eMsgStatus;
-        // sleep((rand() % 21) + 10);              // integer: 10 to 30
-        int i = ((rand() % 21) + 10);              // integer: 10 to 30
-        printf("sleep(%d)\n", i);
-        sleep(i);              // integer: 10 to 30
+        // if(eMsgStatus != OK)
+        // {
+            eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
+            sMsgData.msgStatus = eMsgStatus;
+            // sleep((rand() % 21) + 10);              // integer: 10 to 30
+            int i = ((rand() % 2) + 3);              // integer: 10 to 30
+            printf("sleep(%d)\n", i);
+            sleep(i);              // integer: 10 to 30
+        // }
 	}
 	return 0;
 }

@@ -190,8 +190,7 @@ int j = 0;
 		orderNonResponsiveClient = 0;
 
         // msgrcv, the first message on the queue shall be received
-		//if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
-		if (0)
+		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
         {
             // ERROR
             break;
