@@ -83,28 +83,42 @@ void OperationNonResponsive(MasterList *pMasterList)
 	}
 }
 
-void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, MessageData sMsgData, time_t t)
+void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 {
+	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
+	// seach for the client of the same process id
+	for(int i=0; i < pMasterList->numberOfDCs; i++)
+	{
+		if(sMsgData.processID == pMasterList->dc[i].dcProcessID)
+		{
+			orderIncomingClient = i + 1;
+			break;
+		}
+	}		
+
 	if(orderIncomingClient == 0)					// new client
 	{
 		//add
 		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
 		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
+		dp("add: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 		//log
 	}
-	else											// recored client
+	else											// registered client
 	{
 		if(sMsgData.msgStatus == OFF_LINE)			// status 6
 		{
 			//remove
 			RemoveAndCollapse(orderIncomingClient, pMasterList);
+			dp("remove: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 			//log
 		}
 		else										// status 1 ~ 5
 		{
 			//update
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
+			dp("update: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 			//log
 		}
 	}
@@ -121,7 +135,6 @@ int main (void)
 	MasterList      *pMasterList;
 	time_t 			t;
     struct tm*      localTime;  
-	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
 	int             counter = 0;
 	    
     // initialization 
@@ -200,7 +213,6 @@ int main (void)
     {
 		// initialization
 		t = 0;
-		orderIncomingClient = 0;
 
         // a message on the queue shall be received
 		if ((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
@@ -210,22 +222,13 @@ int main (void)
         }
 		else
 		{
-			dp("[received a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+			dp("[receive a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 			// Get the localtime 
 			t = time(NULL);
 		}
-		
-		// seach for the client of the same process id
-		for(int i=0; i < pMasterList->numberOfDCs; i++)
-		{
-			if(sMsgData.processID == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
-			{
-				orderIncomingClient = i + 1;
-			}
-		}
 
 		//1st operation, processing an incomming message
-		OperationIncomming(orderIncomingClient, pMasterList, sMsgData, t);
+		OperationIncomming(pMasterList, sMsgData, t);
 
 		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
 		OperationNonResponsive(pMasterList);
