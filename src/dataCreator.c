@@ -32,11 +32,9 @@ int main (void)
     eMsgStatus = OK;
     sMsgData.msgStatus = eMsgStatus;
     sMsgData.msgType = MSG_TYPE;                   
-    sMsgData.processID = processID;                   
-
 	processID = getpid();                           // used as the machine's ID value
+    sMsgData.processID = processID;                   
 	printf ("(CLIENT) My PID is %d\n", processID);
-    sMsgData.msgType = processID;                   // using the process id as the msgType field
     
 	messageKey = ftok (".", 1234);                  // same message key as server
 
