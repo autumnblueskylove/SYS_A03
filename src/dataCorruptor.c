@@ -124,7 +124,7 @@ int main()
                     pid = (p->dc[r]).dcProcessID;
                     kill(pid, SIGHUP);
                     // log kill dc
-                    sprintf(temp,"WOD Action %2d - DC-%2d [%d] TERMINATED",r, actionNum, pid);
+                    sprintf(temp,"WOD Action %2d - DC-%2d [%u] TERMINATED",r, actionNum, pid);
                     dlog(DATA_CORRUPTOR,semid,temp);
                     break;
                 }
