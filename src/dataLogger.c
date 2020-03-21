@@ -11,35 +11,39 @@
  */
 
 
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <time.h>
 #include "../inc/dataLogger.h"
 
-void dlog(int progID, int semid, char *contents);
+// int main ()
+// {
+//     int semid;
+//     // get semaphore ID
+//     semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
+//     if(semid == -1)
+//     {
+//         printf("(Logger) Cannot get semid\n");
+//         exit(1);
+//     }
+//     printf ("(Logger) semID is %d\n", semid);
+//     if(semctl(semid, 0, SETALL, init_values) == -1)
+//     {
+//          printf("(Logger) Cannot initialize semid\n");
+//         exit(2);
+//     }
+//     dlog(DATA_CORRUPTOR,semid,"Hello World");
 
-int main ()
-{
-    int semid;
-    // get semaphore ID
-    semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
-    if(semid == -1)
-    {
-        printf("(Logger) Cannot get semid\n");
-        exit(1);
-    }
-    printf ("(Logger) semID is %d\n", semid);
-    if(semctl(semid, 0, SETALL, init_values) == -1)
-    {
-         printf("(Logger) Cannot initialize semid\n");
-        exit(2);
-    }
-    dlog(1,semid,"Hello World");
+//     printf ("(Logger) Release the semaphores\n");
+//     semctl (semid, 0, IPC_RMID,0);
+//     return 1;
+// }
 
-    printf ("(Logger) Release the semaphores\n");
-    semctl (semid, 0, IPC_RMID,0);
-    return 1;
-}
-
-void dlog(int progID, int semid, char *contents)
+void dlog(int progID, int semid, char contents[255])
 {
     char filePath[255] = {""};
     time_t 		    t;
@@ -50,23 +54,23 @@ void dlog(int progID, int semid, char *contents)
     // get semaphore ID
     switch (progID)
     {
-        case 1:
+        case DATA_CREATOR:
             {
                 strcpy(filePath,"/tmp/dataCreator.log");
                 break;
             }
-        case 2:
+        case DATA_MONITOR:
             {
                 strcpy(filePath,"/tmp/dataMonitor.log");
                 break;
             }
-        case 3:
+        case DATA_CORRUPTOR:
             {
                 strcpy(filePath,"/tmp/dataCorruptor.log");
                 break;
             }
     }
-    if (semop (semid, &acquire_operation,1) == -1)
+    if (semop (semid, &acquire_oper,1) == -1)
     {
         printf("(Logger) Cannot start critical region\n");
         exit(1);
@@ -89,7 +93,7 @@ void dlog(int progID, int semid, char *contents)
     fprintf(fp,"%s\n",contents);
     fclose(fp);
 
-    if(semop(semid, &release_operation,1) == -1)
+    if(semop(semid, &release_oper,1) == -1)
     {
         printf("(Logger) Can't exit critical region\n");
         semctl ( semid, 0, IPC_RMID);

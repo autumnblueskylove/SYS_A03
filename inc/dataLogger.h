@@ -71,8 +71,5 @@ unsigned short init_values[1] = { 1 };
  * Basically, the keyword "extern" allows source files to access and use
  * global structures and variables without having to declare / initialize them
  * =========================================================================== */
-extern struct sembuf acquire_operation;
-extern struct sembuf release_operation;
-unsigned short init_values[1] = { 1 };
 
 #endif
