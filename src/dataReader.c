@@ -45,23 +45,38 @@ int RemoveAndCollapse(int orderIncomingClient, MasterList *pMasterList)
 	}
 }
 
-void OperationNonResponsive(int orderNonResponsiveClient, MasterList *pMasterList)
+void OperationNonResponsive(MasterList *pMasterList)
 {
 	time_t t;
-	while(orderNonResponsiveClient != 0)						// if there is a time outed client or more
-	{
-		// seach for the client
-		for(int i=0; i < pMasterList->numberOfDCs; i++)
-		{
+	int counter = 0;
+	int orderNonResponsiveClient = 0;				// 0: no non-responsive client
+	int startingPointConsecutive = 0;				// consecutive starting point for the counter
 
+	while(LOOP_FOREVER)						
+	{
+		//initialization
+		orderNonResponsiveClient = 0;
+
+		// seaching for non-responsive clients
+		for(counter = startingPointConsecutive; counter < pMasterList->numberOfDCs; counter++)
+		{
 			t = time(NULL);
-			if( (t - pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom) > 35)     //more than 35 seconds
-			{
-				orderNonResponsiveClient = i + 1;
+			if( (t - pMasterList->dc[counter].lastTimeHeardFrom) > TIME_OUT)     
+			{	//more than 35 seconds
+				startingPointConsecutive = counter;
+				orderNonResponsiveClient = counter + 1;
+				break;
 			} 
 		}
 		// log1: non-responsive
-		RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
+		if(orderNonResponsiveClient > 0)
+		{
+			RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
+		}
+		else
+		{
+			break;
+		}
 	}
 }
 
@@ -86,7 +101,6 @@ void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, Messag
 		else										// status 1 ~ 5
 		{
 			//update
-			// pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.processID;;
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
 			//log
 		}
@@ -213,7 +227,7 @@ int main (void)
 		OperationIncomming(orderIncomingClient, pMasterList, sMsgData, t);
 
 		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
-		OperationNonResponsive(orderNonResponsiveClient, pMasterList);
+		OperationNonResponsive(pMasterList);
 
 		//3rd operation, checking if all clients are removed from the list
 		if(pMasterList->numberOfDCs == 0)
