@@ -85,41 +85,44 @@ void OperationNonResponsive(MasterList *pMasterList)
 
 void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 {
-	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
-	// seach for the client of the same process id
-	for(int i=0; i < pMasterList->numberOfDCs; i++)
+	int counter = 0;
+	int orderIncomingClient = 0;					// the order of the registered client in the list, 
+	                                        		// ... whose process id is same as the new one
+
+	// seaching for the client of the same process id
+	for(counter = 0; counter < pMasterList->numberOfDCs; counter++)
 	{
-		if(sMsgData.processID == pMasterList->dc[i].dcProcessID)
+		if(sMsgData.processID == pMasterList->dc[counter].dcProcessID)
 		{
-			orderIncomingClient = i + 1;
+		orderIncomingClient = counter + 1;			// 1-indexed ID
 			break;
 		}
 	}		
 
 	if(orderIncomingClient == 0)					// new client
 	{
-		//add
+		// adding
 		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
 		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
 		dp("add: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
-		//log
+		///log
 	}
 	else											// registered client
 	{
 		if(sMsgData.msgStatus == OFF_LINE)			// status 6
 		{
-			//remove
+			// removing
 			RemoveAndCollapse(orderIncomingClient, pMasterList);
 			dp("remove: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
-			//log
+			///log
 		}
 		else										// status 1 ~ 5
 		{
-			//update
+			// updating
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
 			dp("update: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
-			//log
+			///log
 		}
 	}
 }
