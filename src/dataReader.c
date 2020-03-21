@@ -181,13 +181,12 @@ int main (void)
 
 	// initialize the data of the shared memory our data to blanks
     pMasterList->msgQueueID = queueID;
-    // pMasterList->numberOfDCs = 0;
-    
-	// for (counter = 0; counter < MAX_DC_ROLES; counter++) 
-	// {
-	//     pMasterList->dc[counter].dcProcessID = 0;
-	//     pMasterList->dc[counter].lastTimeHeardFrom = 0;
-	// }
+    pMasterList->numberOfDCs = 0;
+	for (counter = 0; counter < MAX_DC_ROLES; counter++) 
+	{
+	    pMasterList->dc[counter].dcProcessID = 0;
+	    pMasterList->dc[counter].lastTimeHeardFrom = 0;
+	}
 
     // Waiting after allocating the resources
 	printf("stop watch: start, 2 seconds\n");
