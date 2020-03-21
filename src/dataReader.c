@@ -119,7 +119,6 @@ int main (void)
 	time_t 			t;
     struct tm*      localTime;  
 	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
-	int 			orderNonResponsiveClient = 0;  		// the order of the time ounted client in the list
 	int             counter = 0;
 	    
     // initialization 
@@ -199,7 +198,6 @@ int main (void)
 		// initialization
 		t = 0;
 		orderIncomingClient = 0;
-		orderNonResponsiveClient = 0;
 
         // a message on the queue shall be received
 		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), MSG_TYPE, 1)) == FAILURE)
