@@ -44,4 +44,6 @@ const char kDescriptionStatus[NUM_STATUS][NUM_STRING] = {
     "Operator Error",
     "Machine is Off-line"
 };
+#elif
+fdsafdsafds
 #endif
