@@ -25,6 +25,11 @@
 #include "../inc/shdMemory.h"
 #include "../inc/debug.h"
 
+#define LOOP_FOREVER                    1           // for an infinite loop
+#define TIME_OUT                        35          // for non-responsive clients
+#define FAILURE                         -1
+#define MICRO_SECOND                    1000000
+
 int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {
 	// all element except for the last one

@@ -1,3 +1,11 @@
+/*
+ * File        : dataCreator.h
+ * Project     : Hoochmacallit
+ * By          : Hyungbum Kim and Charng Gwon Lee
+ * Date        : March 21, 2020
+ * Description : This header file contains all the required definitions for the
+ *               source file of dataCreator.c.
+ */
 
 #define MSG_TYPE                        1234        // for message queue
 #define NUM_STATUS                      7           // for the description of the status

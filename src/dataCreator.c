@@ -19,9 +19,11 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
-#include "../inc/dataCreator.h"
 #include "../inc/msgQueue.h"
 #include "../inc/debug.h"
+
+#define LOOP_FOREVER                    1           // for an infinite loop
+#define FAILURE                         -1
 
 int main (void)
 {
