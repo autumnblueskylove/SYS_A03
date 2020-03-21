@@ -22,3 +22,5 @@
 #define     DO_NOTING       0
 #define     KILL_DC         1
 #define     DELETE_MSGQ     2
+
+int wod(int shmid, int semid);
