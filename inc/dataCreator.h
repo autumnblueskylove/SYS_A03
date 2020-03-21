@@ -11,9 +11,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define MSG_TYPE                        1234        // for message queue
 #define TIME_INTERVAL_CHECK_QUEUE       10          // to check for message queue
 #define NUM_STATUS                      7           // for the description of the status
 #define FAILURE                         -1
+#define NUM_STRING                      40
 
 typedef enum
 {
@@ -29,10 +31,12 @@ typedef enum
 typedef struct                                      // related to a message queue structure
 {
     long msgType;
+    int processID;
 	int msgStatus;
 } MessageData;
 
-const char kDescriptionStatus[NUM_STATUS][40] = {       // description of the client's status
+// description of the client's status
+const char kDescriptionStatus[NUM_STATUS][NUM_STRING] = { 
     "Everything is OKAY",
     "Hydraulic Pressure Failure",
     "Safety Button Failure",

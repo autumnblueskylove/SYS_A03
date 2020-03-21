@@ -68,7 +68,7 @@ void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, Messag
 	if(orderIncomingClient == 0)					// new client
 	{
 		//add
-		pMasterList->dc[orderIncomingClient].dcProcessID = sMsgData.msgType;
+		pMasterList->dc[orderIncomingClient].dcProcessID = sMsgData.processID;
 		pMasterList->dc[orderIncomingClient].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
 		//log
@@ -85,7 +85,7 @@ void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, Messag
 		else									// status 1 ~ 5
 		{
 			//update
-			pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.msgType;
+			pMasterList->dc[orderIncomingClient - 1].dcProcessID = sMsgData.processID;;
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
 			//log
 		}
@@ -165,14 +165,14 @@ int main (void)
 	}
 
 	// initialize the data of the shared memory our data to blanks
-    pMasterList->msgQueueID = 0;
-    pMasterList->numberOfDCs = 0;
+    // pMasterList->msgQueueID = 0;
+    // pMasterList->numberOfDCs = 0;
     
-	for (counter = 0; counter < MAX_DC_ROLES; counter++) 
-	{
-	    pMasterList->dc[counter].dcProcessID = 0;
-	    pMasterList->dc[counter].lastTimeHeardFrom = 0;
-	}
+	// for (counter = 0; counter < MAX_DC_ROLES; counter++) 
+	// {
+	//     pMasterList->dc[counter].dcProcessID = 0;
+	//     pMasterList->dc[counter].lastTimeHeardFrom = 0;
+	// }
 
     // Waiting after allocating the resources
 	printf("stop watch: start, 2 seconds\n");
@@ -189,8 +189,8 @@ int j = 0;
 		orderIncomingClient = 0;
 		orderNonResponsiveClient = 0;
 
-        // msgrcv, the first message on the queue shall be received
-		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), 0, 0)) == FAILURE)
+        // a message on the queue shall be received
+		if ((msgrcv(queueID, (void *)&sMsgData, sizeof(int), MSG_TYPE, 0)) == FAILURE)
         {
             // ERROR
             break;
@@ -199,21 +199,12 @@ int j = 0;
 		{
 			// Get the localtime 
 			t = time(NULL);
-			// localTime = localtime(&t); 
-			// printf("[%d-%d-%d %d:%d:%d] : DDDD\n", (localTime->tm_year + 1900), (localTime->tm_mon + 1), localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-
-			//sMsgData.msgStatus
-			//sMsgData.msgType
-
-			//pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.msgType; 
-			//pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t; 
-			//pMasterList->numberOfDCs; 
 		}
 		
 		// seach for the client of the same message type
 		for(int i=0; i < pMasterList->numberOfDCs; i++)
 		{
-			if(sMsgData.msgType == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
+			if(sMsgData.processID == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
 			{
 				orderIncomingClient = i + 1;
 			}

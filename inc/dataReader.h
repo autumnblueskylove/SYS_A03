@@ -13,8 +13,9 @@
 #include <sys/types.h>
 #include <time.h>
 
-#define MAX_DC_ROLES             10     // the maximum number of clients
-#define FAILURE                  -1
+#define MSG_TYPE                        1234        // for message queue
+#define MAX_DC_ROLES                    10          // the maximum number of clients
+#define FAILURE                         -1
 
 typedef enum
 {
@@ -30,6 +31,7 @@ typedef enum
 typedef struct                                      // related to a message queue structure
 {
     long msgType;
+    int processID;
 	int msgStatus;
 } MessageData;
 
