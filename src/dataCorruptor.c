@@ -26,7 +26,7 @@ int main()
     int r;
     key_t shmem_key;
     MasterList *p;
-    char temp[255];
+    char temp[MAX_STRING_LOG];
     int actionNum = 0;
 
     // get key for shared memory

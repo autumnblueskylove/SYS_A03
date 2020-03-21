@@ -82,9 +82,8 @@ int main (void)
         }
         dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
         // logging the activity of sending a message
-        char log[200];
+        char log[MAX_STRING_LOG];
         sprintf (log, "DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
-        printf ("DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
         dlog(DATA_CREATOR, semid, log);
 
     
