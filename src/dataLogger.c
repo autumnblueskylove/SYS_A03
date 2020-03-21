@@ -94,7 +94,7 @@ void dlog(int progID, int semid, char contents[255])
     }
 
     // open file for logging messages
-    if ((fp = fopen(filePath,"w+"))== NULL)
+    if ((fp = fopen(filePath,"a+"))== NULL)
     {
         printf("(Logger) Cannot write to shared file\n");
         semctl ( semid, 0, IPC_RMID);

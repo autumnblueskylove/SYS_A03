@@ -85,15 +85,18 @@ int main()
         actionNum++;
         //Step1: sleep for a random amount of time (10 ~ 30)
         r = (rand() % 21) + 10;
+        printf("(Logger) sleep1 %d\n",r);
         sleep(r);
         //Step2 : check for the existance of the message queue
         mid = p->msgQueueID;
+        printf("(Logger) msgQueueID %d\n",mid);
         if(mid == 0)
         {
             // detach from shared memory
             shmdt (p);
             // remove shared memory
             shmctl(shmid,IPC_RMID,0);
+            printf("DX deteched that msgQ is gone - assuming DR/DCs done\n");
             // print log file
             dlog(DATA_CORRUPTOR,semid,"DX deteched that msgQ is gone - assuming DR/DCs done");
             // remove semaphore
@@ -111,6 +114,7 @@ int main()
             case DO_NOTING:
                 {
                     // log do notiong
+                    printf("do nothing\n");
                     dlog(DATA_CORRUPTOR,semid,"do nothing");
                     break;
                 }
@@ -120,7 +124,8 @@ int main()
                     pid = (p->dc[r]).dcProcessID;
                     kill(pid, SIGHUP);
                     // log kill dc
-                    sprintf(temp,"WOD Action %2d - DC-%2d [%u] TERMINATED",r, actionNum, pid);
+                    printf("WOD Action %02d - DC-%02d [%u] TERMINATED\n",actionNum, r, pid);
+                    sprintf(temp,"WOD Action %02d - DC-%02d [%u] TERMINATED",actionNum, r, pid);
                     dlog(DATA_CORRUPTOR,semid,temp);
                     break;
                 }
@@ -128,6 +133,7 @@ int main()
                 {
                     // log delete message queue
                     msgctl (mid, IPC_RMID, NULL);
+                    printf("DX deleted the msgQ - the DR/DCs can't talk anymore - exiting\n");
                     dlog(DATA_CORRUPTOR,semid,"DX deleted the msgQ - the DR/DCs can't talk anymore - exiting");
                     break;
                 }
