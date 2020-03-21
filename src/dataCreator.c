@@ -47,7 +47,8 @@ int main (void)
 	printf("LOOP: checking for message queue\n");
 	while ((queueID = msgget (messageKey, 0)) == FAILURE) 
 	{
-        sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
+        //sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
+        sleep(1);           // interval to check for message queue
 	}
 	printf ("(CLIENT) The message queue ID is %d\n", queueID);
 
@@ -61,15 +62,12 @@ int main (void)
         }
         printf("SUCCESS: a message sent\n");
 
-        if(eMsgStatus != OK)
-        {
-            eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
-            sMsgData.msgStatus = eMsgStatus;
-            // sleep((rand() % 21) + 10);              // integer: 10 to 30
-            int i = ((rand() % 21) + 10);              // integer: 10 to 30
-            printf("sleep(%d)\n", i);
-            sleep(i);              // integer: 10 to 30
-        }
+        eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
+        sMsgData.msgStatus = eMsgStatus;
+        // sleep((rand() % 21) + 10);              // integer: 10 to 30
+        int i = ((rand() % 21) + 10);              // integer: 10 to 30
+        printf("sleep(%d)\n", i);
+        sleep(i);              // integer: 10 to 30
 	}
 	return 0;
 }
