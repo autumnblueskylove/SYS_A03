@@ -28,13 +28,14 @@
 
 int main (void)
 {
-    key_t	 	    messageKey;						// key for a message queue
-	key_t           shmKey;							// key for a shared memory
-	int 		    queueID = -1;                   // message queue ID
-	int             shmId = -1;						// shared memory ID
-    MessageStatus   eMsgStatus;
-    MessageData 	sMsgData;
-	MasterList      *pMasterList;
+    key_t	 	    messageKey;						// a key-type for message queue
+	key_t           shmKey;							// a key-type for shared memory
+	int 		    queueID = -1;                   // for message queue ID
+	int             shmId = -1;						// for shared memory ID
+    MessageStatus   eMsgStatus;                     // enum for status info.
+    MessageData 	sMsgData;                       // stuct for message info.
+	MasterList      *pMasterList;                   // for stuct for list info.
+    char            strLog[MAX_STRING_LOG];         // for logging
 	time_t 			t;
 	int             counter = 0;
 	    
@@ -43,12 +44,12 @@ int main (void)
 	sMsgData.processID = 0;
 	sMsgData.msgStatus = 0;
 
-    // MESSAGE QUEUE
+    // setting up message queue
     messageKey = ftok (".", 1234);                  // same message key as server
-
 	if (messageKey == FAILURE) 
-	{ 
+	{   // ERROR: cannot allocate a message key
 	    printf ("ERROR: cannot allocate a message key\n");
+        dlog(DATA_CREATOR, semId, "DC [%d] - EROOR: cannot allocate any message key");
 	    return -1;
 	}
 
