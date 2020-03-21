@@ -18,6 +18,10 @@
 #ifndef __DATA_LOGGER_H__
 #define __DATA_LOGGER_H__
 
+#define DATA_CREATOR        0
+#define DATA_MONITOR        1
+#define DATA_CORRUPTOR      2
+
 /* ==========================================================================
  * Why does this "#ifndef" have an "#else" clause?!?!?
  *

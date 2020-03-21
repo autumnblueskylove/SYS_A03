@@ -70,7 +70,7 @@ void dlog(int progID, int semid, char contents[255])
                 break;
             }
     }
-    if (semop (semid, &acquire_oper,1) == -1)
+    if (semop (semid, &acquire_operation,1) == -1)
     {
         printf("(Logger) Cannot start critical region\n");
         exit(1);
@@ -93,7 +93,7 @@ void dlog(int progID, int semid, char contents[255])
     fprintf(fp,"%s\n",contents);
     fclose(fp);
 
-    if(semop(semid, &release_oper,1) == -1)
+    if(semop(semid, &release_operation,1) == -1)
     {
         printf("(Logger) Can't exit critical region\n");
         semctl ( semid, 0, IPC_RMID);
