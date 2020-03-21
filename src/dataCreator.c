@@ -67,6 +67,7 @@ int main (void)
             sMsgData.msgStatus = eMsgStatus;
             // sleep((rand() % 21) + 10);              // integer: 10 to 30
             int i = ((rand() % 21) + 10);              // integer: 10 to 30
+            printf("sleep(%d)\n", i);
             sleep(i);              // integer: 10 to 30
         }
 	}
