@@ -15,11 +15,11 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
-#include <time.h>
 #include "../inc/dataReader.h"
 #include "../inc/msgQueue.h"
 #include "../inc/shdMemory.h"

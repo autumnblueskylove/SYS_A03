@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -68,8 +69,10 @@ int main (void)
 
         // if(eMsgStatus != OK)
         // {
+            srand(time(0));
             eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
             sMsgData.msgStatus = eMsgStatus;
+            srand(time(0));
             // sleep((rand() % 21) + 10);              // integer: 10 to 30
             int i = ((rand() % 2) + 3);              // integer: 10 to 30
             printf("sleep(%d)\n", i);
