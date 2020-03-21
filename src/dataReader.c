@@ -155,6 +155,13 @@ int main (void)
     return 0;
 }
 
+/*
+ * Function		: RemoveAndCollapse()
+ * Description	: This function gets rid of an element of a list collapsing the list.
+ * Parameters	: int orderClient 			: indicates the element of clients registerd
+ *                MasterList *pMasterList	: a list for registerd clients
+ * Returns		: int    				: if SUCESS, returns (0), if FIALURE, returns (-11)
+ */
 int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {
 	// all element except for the last one
@@ -176,8 +183,17 @@ int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 		printf("[ERROR] unknown error\n");
 		return -11;
 	}
+
+	return 0;
 }
 
+/*
+ * Function		: OperationNonResponsive()
+ * Description	: This function searches non-responsive clients, and then
+ *                removes them from a list.
+ * Parameters	: MasterList *pMasterList	: a list for registerd clients
+ * Returns		: nothing
+ */
 void OperationNonResponsive(MasterList *pMasterList)
 {
 	time_t t;
@@ -190,7 +206,7 @@ void OperationNonResponsive(MasterList *pMasterList)
 		//initialization
 		orderNonResponsiveClient = 0;
 
-		// seaching for non-responsive clients
+		// searching for non-responsive clients
 		for(counter = startingPointConsecutive; counter < pMasterList->numberOfDCs; counter++)
 		{
 			t = time(NULL);
@@ -213,12 +229,21 @@ void OperationNonResponsive(MasterList *pMasterList)
 	}
 }
 
+/*
+ * Function		: OperationIncomming()
+ * Description	: This function is to manipulate a list on shared memory
+ *                such as adding, update and removing.
+ * Parameters	: MasterList *pMasterList   : a list for registerd clients
+ *                MessageData sMsgData      : a list for registerd clients
+ *                time_t t                  : indicates a calendar time
+ * Returns		: nothing
+ */
 void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 {
 	int counter = 0;
 	int orderIncomingClient = 0;					// the order of the registered client in the list, 
 	                                        		// ... whose process id is same as the new one
-	// seaching for the client of the same process id
+	// searching for the client of the same process id
 	for(counter = 0; counter < pMasterList->numberOfDCs; counter++)
 	{
 		if(sMsgData.processID == pMasterList->dc[counter].dcProcessID)
