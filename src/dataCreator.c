@@ -31,6 +31,8 @@ int main (void)
     // initialization
     eMsgStatus = OK;
     sMsgData.msgStatus = eMsgStatus;
+    sMsgData.msgType = MSG_TYPE;                   
+    sMsgData.processID = processID;                   
 
 	processID = getpid();                           // used as the machine's ID value
 	printf ("(CLIENT) My PID is %d\n", processID);
