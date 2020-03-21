@@ -207,6 +207,7 @@ int main (void)
         }
 		else
 		{
+			dp("[received a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 			// Get the localtime 
 			t = time(NULL);
 		}
