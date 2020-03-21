@@ -94,7 +94,7 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 	{
 		if(sMsgData.processID == pMasterList->dc[counter].dcProcessID)
 		{
-		orderIncomingClient = counter + 1;			// 1-indexed ID
+			orderIncomingClient = counter + 1;		// 1-indexed ID
 			break;
 		}
 	}		
@@ -105,7 +105,7 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
 		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
-		dp("add: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
+		dp("[add] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient + 1, pMasterList->numberOfDCs);
 		///log
 	}
 	else											// registered client
@@ -114,14 +114,14 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 		{
 			// removing
 			RemoveAndCollapse(orderIncomingClient, pMasterList);
-			dp("remove: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
+			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 			///log
 		}
 		else										// status 1 ~ 5
 		{
 			// updating
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
-			dp("update: dcID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
+			dp("[update] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 			///log
 		}
 	}
@@ -225,7 +225,7 @@ int main (void)
         }
 		else
 		{
-			dp("[receive a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+			dp("[receive] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 			// Get the localtime 
 			t = time(NULL);
 		}

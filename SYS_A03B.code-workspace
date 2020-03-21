@@ -6,7 +6,9 @@
 	],
 	"settings": {
 		"files.associations": {
-			"stdio.h": "c"
+			"stdio.h": "c",
+			"shdmemory.h": "c",
+			"msgqueue.h": "c"
 		}
 	}
 }

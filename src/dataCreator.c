@@ -63,7 +63,7 @@ int main (void)
             printf ("ERROR: cannot send a message\n");
             return -2;
         }
-        dp("[send a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+        dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
     
         if(eMsgStatus != OFF_LINE)
         {
