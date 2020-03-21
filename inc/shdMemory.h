@@ -1,10 +1,10 @@
 /*
- * File        : dataReader.h
+ * File        : shdMemory.h
  * Project     : Hoochmacallit
  * By          : Hyungbum Kim and Charng Gwon Lee
  * Date        : March 21, 2020
- * Description : This header file contains all the required definitions for the
- *               source file of dataReader.c.
+ * Description : This header file contains all the required definition and 
+ *               the data stuructors for a shared memory.
  */
 
 #ifndef __SHD_MEMORY_H__
@@ -18,7 +18,7 @@ typedef struct
     time_t  lastTimeHeardFrom;
 } DCInfo;
 
-typedef struct                          // related to a shared memory structure
+typedef struct                  
 {
     int     msgQueueID;
     int     numberOfDCs;
