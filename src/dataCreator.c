@@ -9,6 +9,7 @@
  *               It sends such a message on a random time basis.
  * 
  */
+#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,81 +27,72 @@
 
 int main (void)
 {
-	pid_t		processID;
-	key_t	 	messageKey;
-	int 		queueID = -1;                       // message queue ID
-    MessageStatus   eMsgStatus;
-	MessageData 	sMsgData;
+	key_t	 	    messageKey;                     // a key-type for message queue
+	pid_t		    processID;                      // for process ID
+	int 		    queueID = -1;                   // for message queue ID
+    int             semId = -1;                     // for semaphore ID
+    MessageStatus   eMsgStatus;                     // enum for status info.
+	MessageData 	sMsgData;                       // stuct for message info.
+    char            strLog[MAX_STRING_LOG];         // for logging
 
     // initialization
-    eMsgStatus = OK;
+    eMsgStatus = OK;                                // the first status
+	processID = getpid();                           // used as the machine's ID value
     sMsgData.msgStatus = eMsgStatus;
     sMsgData.msgType = MSG_TYPE;                   
-	processID = getpid();                           // used as the machine's ID value
     sMsgData.processID = processID;                   
-	printf ("(CLIENT) My PID is %d\n", processID);
     
-	messageKey = ftok (".", 1234);                  // same message key as server
+    // setting up semaphore
+    semId = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
+    if(semId == FAILURE)
+    {   // EROOR: cannot get any semaphore id
+        return -1;
+    }
+    if(semctl(semId, 0, SETALL, init_values) == FAILURE)
+    {   // EROOR: cannot initialize semaphore
+        return -2;
+    }
 
+    // setting up message queue
+	messageKey = ftok (".", 1234);                  // same message key as server's one
 	if(messageKey == FAILURE) 
-	{ 
-	    printf ("ERROR: cannot allocate a message key\n");
-	    return -1;
+	{   // ERROR: cannot allocate a message key
+        dlog(DATA_CREATOR, semId, "DC [%d] - EROOR: cannot allocate any message key");
+	    return -3;
 	}
 
-	printf("(CLIENT) checking for message queue, 1 second\n");
+    // getting for message queue...
 	while((queueID = msgget (messageKey, 0)) == FAILURE) 
 	{
-        //sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
-        sleep(1);
+        sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
 	}
-	printf ("(CLIENT) The message queue ID is %d\n", queueID);
 
-
-// get semaphore ID
-    int semid;
-    semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
-    if(semid == -1)
-    {
-        printf("(Logger) Cannot get semid\n");
-        exit(1);
-    }
-    printf ("(Logger) semID is %d\n", semid);
-    if(semctl(semid, 0, SETALL, init_values) == -1)
-    {
-         printf("(Logger) Cannot initialize semid\n");
-        exit(2);
-    }
-
-
-	while(LOOP_FOREVER)                             // MAIN LOOP
+    // MAIN LOOP
+	while(LOOP_FOREVER)                             
 	{
         if(msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
-        {
-            printf ("ERROR: cannot send a message\n");
-            return -2;
+        {   // ERROR: cannot send a message
+            dlog(DATA_CREATOR, semId, "DC [%d] - EROOR: cannot send any message");
+            return -4;
         }
         dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
-        // logging the activity of sending a message
-        char log[MAX_STRING_LOG];
-        sprintf (log, "DC [%d] - MSG SENT - Satus %d (%s)", sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
-        dlog(DATA_CREATOR, semid, log);
 
-    
-        if(eMsgStatus != OFF_LINE)
+        // logging the activity of sending a message
+        sprintf (strLog, "DC [%d] - MSG SENT - Satus %d (%s)", 
+            sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+        dlog(DATA_CREATOR, semId, strLog);
+
+        if(eMsgStatus != OFF_LINE)                              // status 1 ~ 5
         {
             srand(time(0));
-            eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
+            eMsgStatus = (rand() % (NUM_STATUS - 1)) + 1;       // integer: 1 to 6
             sMsgData.msgStatus = eMsgStatus;
             srand(time(0));
-            // sleep((rand() % 21) + 10);              // integer: 10 to 30
-            int i = ((rand() % 2) + 3);              // integer: 10 to 30
-            printf("sleep(%d)\n", i);
-            sleep(i);              // integer: 10 to 30
+            sleep((rand() % TIME_RANGE_SLEEP) + TIME_MIN_SLEEP);// integer: 10 to 30
         }
-        else
+        else                                                    // status 6
         {
-            break;                                  // to exit
+            break;                                              // to exit
         }
 	}
     

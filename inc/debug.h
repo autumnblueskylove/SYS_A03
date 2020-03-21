@@ -1,4 +1,3 @@
-#define DEBUG 1
 #define LENGTH_FUNCTION 25
 #if defined(DEBUG) && DEBUG > 0
 #define dp(fmt, args...) fprintf(stderr, "DEBUG: %d: %-25s(): " fmt, \

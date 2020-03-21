@@ -24,6 +24,8 @@
 #include "../inc/dataLogger.h"
 #include "../inc/debug.h"
 
+#define DEBUG 1
+
 int main (void)
 {
     key_t	 	    messageKey;						// key for a message queue
