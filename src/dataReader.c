@@ -3,11 +3,10 @@
  * Project     : Hoochmacallit
  * By          : Hyungbum Kim and Charng Gwon Lee
  * Date        : March 21, 2020
- * Description : This program is to generate an S19 download file format or an
- *               assembly file which are both readable by human.
- *               This utility takes any binary input file and fransforms it
- *               into S-Record output file, or an assembly file for use in an
- *               embedded software development environment.
+ * Description : This program is a server application for IPC using the techniques
+ *               both message queue and shared momory. The server keep track of the
+ *               number of different and active clients present in the system. It
+ *               can communicate with upto 10 clients.
  */
 
 #include <stdio.h>
@@ -19,96 +18,10 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
-#include <time.h>
 #include "../inc/dataReader.h"
 #include "../inc/msgQueue.h"
 #include "../inc/shdMemory.h"
 #include "../inc/debug.h"
-
-int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
-{
-	// all element except for the last one
-	for(int i=(orderClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
-	{
-		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
-		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
-	}
-
-	// the last one
-	pMasterList->dc[pMasterList->numberOfDCs -1].dcProcessID =	0;
-	pMasterList->dc[pMasterList->numberOfDCs -1].lastTimeHeardFrom = 0;
-
-	// decrease in the total number of whole clients
-	pMasterList->numberOfDCs--;						
-
-	if(pMasterList->numberOfDCs < 0)
-	{
-		//ERROR: unknown
-		return -11;
-	}
-}
-
-void OperationNonResponsive(MasterList *pMasterList)
-{
-	time_t t;
-	int counter = 0;
-	int orderNonResponsiveClient = 0;				// 0: no non-responsive client
-	int startingPointConsecutive = 0;				// consecutive starting point for the counter
-
-	while(LOOP_FOREVER)						
-	{
-		//initialization
-		orderNonResponsiveClient = 0;
-
-		// seaching for non-responsive clients
-		for(counter = startingPointConsecutive; counter < pMasterList->numberOfDCs; counter++)
-		{
-			t = time(NULL);
-			if( (t - pMasterList->dc[counter].lastTimeHeardFrom) > TIME_OUT)     
-			{	//more than 35 seconds
-				startingPointConsecutive = counter;
-				orderNonResponsiveClient = counter + 1;
-				break;
-			} 
-		}
-		// log1: non-responsive
-		if(orderNonResponsiveClient > 0)
-		{
-			RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
-		}
-		else
-		{
-			break;
-		}
-	}
-}
-
-void OperationIncomming(int orderIncomingClient, MasterList *pMasterList, MessageData sMsgData, time_t t)
-{
-	if(orderIncomingClient == 0)					// new client
-	{
-		//add
-		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
-		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
-		pMasterList->numberOfDCs++;
-		//log
-	}
-	else											// recored client
-	{
-		if(sMsgData.msgStatus == OFF_LINE)			// status 6
-		{
-			//remove
-			RemoveAndCollapse(orderIncomingClient, pMasterList);
-			//log
-		}
-		else										// status 1 ~ 5
-		{
-			//update
-			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
-			//log
-		}
-	}
-}
 
 int main (void)
 {
@@ -120,8 +33,6 @@ int main (void)
     MessageData 	sMsgData;
 	MasterList      *pMasterList;
 	time_t 			t;
-    struct tm*      localTime;  
-	int 			orderIncomingClient = 0;			// the order of the current incomming client in the list
 	int             counter = 0;
 	    
     // initialization 
@@ -162,22 +73,21 @@ int main (void)
 
 	if ((shmId = shmget (shmKey, sizeof (MasterList), 0)) == FAILURE) 
 	{
-	    printf ("(PRODUCER) No Shared-Memory currently available - so create!\n");
+	    printf ("(SERVER) No Shared-Memory currently available - so create!\n");
 	    shmId = shmget (shmKey, sizeof (MasterList), IPC_CREAT | 0660);
 	    if (shmId == FAILURE) 
 	    {
-	        printf ("(PRODUCER) Cannot allocate a new memory!\n");
+	        printf ("(SERVER) Cannot allocate a new memory!\n");
 	        return -2;
 	    }
 	}
-
-	printf ("(PRODUCER) Our Shared-Memory ID is %d\n", shmId);
+	printf ("(SERVER) The shared-Memory ID is %d\n", shmId);
 
     // attatch to the shared memory
 	pMasterList = (MasterList *)shmat (shmId, NULL, 0); 
 	if (pMasterList == NULL) 
 	{
-	    printf ("(PRODUCER) Cannot attach to shared memory!\n");
+	    printf ("[ERROR] Cannot attach to shared memory!\n");
 	    return -3;
 	}
 
@@ -192,40 +102,29 @@ int main (void)
 
     // Waiting after allocating the resources
 	printf("stop watch: start, 2 seconds\n");
-    //sleep(15);
+    //sleep(15);										// 15 seconds
     sleep(2);
 
-    // MAIN LOOP
-    while(LOOP_FOREVER) 
+    while(LOOP_FOREVER) 							// MAIN LOOP
     {
 		// initialization
 		t = 0;
-		orderIncomingClient = 0;
 
         // a message on the queue shall be received
-		if ((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
+		if((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
         {
-            // ERROR
+            printf ("ERROR: cannot receive a message\n");
             break;
         }
 		else
 		{
-			dp("[received a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+			dp("[receive] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 			// Get the localtime 
 			t = time(NULL);
 		}
-		
-		// seach for the client of the same process id
-		for(int i=0; i < pMasterList->numberOfDCs; i++)
-		{
-			if(sMsgData.processID == pMasterList->dc[pMasterList->numberOfDCs].dcProcessID)
-			{
-				orderIncomingClient = i + 1;
-			}
-		}
 
 		//1st operation, processing an incomming message
-		OperationIncomming(orderIncomingClient, pMasterList, sMsgData, t);
+		OperationIncomming(pMasterList, sMsgData, t);
 
 		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
 		OperationNonResponsive(pMasterList);
@@ -242,15 +141,116 @@ int main (void)
     }
 
 	// release the queue
-	msgctl (queueID, IPC_RMID, (struct msqid_ds *)NULL);
+	msgctl(queueID, IPC_RMID, (struct msqid_ds *)NULL);
 
 	// detach the shared memory
-	printf("(PRODUCER) Detaching from Shared-Memory\n");
-	shmdt (pMasterList);
+	printf("(SERVER) Detaching from Shared-Memory\n");
+	shmdt(pMasterList);
 	
     // release the shared memory
-    printf("(PRODUCER) Removing the Shared-Memory resource\n");
-	shmctl (shmId, IPC_RMID, (struct shmid_ds *)NULL);
+    printf("(SERVER) Removing the Shared-Memory resource\n");
+	shmctl(shmId, IPC_RMID, (struct shmid_ds *)NULL);
 
     return 0;
+}
+
+int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
+{
+	// all element except for the last one
+	for(int i=(orderClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
+	{
+		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
+		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
+	}
+
+	// the last one
+	pMasterList->dc[pMasterList->numberOfDCs -1].dcProcessID =	0;
+	pMasterList->dc[pMasterList->numberOfDCs -1].lastTimeHeardFrom = 0;
+
+	// decrease in the total number of whole clients
+	pMasterList->numberOfDCs--;						
+
+	if(pMasterList->numberOfDCs < 0)
+	{
+		printf("[ERROR] unknown error\n");
+		return -11;
+	}
+}
+
+void OperationNonResponsive(MasterList *pMasterList)
+{
+	time_t t;
+	int counter = 0;
+	int orderNonResponsiveClient = 0;				// 0: no non-responsive client
+	int startingPointConsecutive = 0;				// consecutive starting point for the counter
+
+	while(LOOP_FOREVER)						
+	{
+		//initialization
+		orderNonResponsiveClient = 0;
+
+		// seaching for non-responsive clients
+		for(counter = startingPointConsecutive; counter < pMasterList->numberOfDCs; counter++)
+		{
+			t = time(NULL);
+			if( (t - pMasterList->dc[counter].lastTimeHeardFrom) > TIME_OUT)     
+			{	//more than 35 seconds
+				startingPointConsecutive = counter;
+				orderNonResponsiveClient = counter + 1;
+				break;
+			} 
+		}
+		// log1: non-responsive
+		if(orderNonResponsiveClient > 0)
+		{
+			RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
+		}
+		else
+		{
+			break;
+		}
+	}
+}
+
+void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
+{
+	int counter = 0;
+	int orderIncomingClient = 0;					// the order of the registered client in the list, 
+	                                        		// ... whose process id is same as the new one
+	// seaching for the client of the same process id
+	for(counter = 0; counter < pMasterList->numberOfDCs; counter++)
+	{
+		if(sMsgData.processID == pMasterList->dc[counter].dcProcessID)
+		{
+			orderIncomingClient = counter + 1;		// 1-indexed ID
+			break;
+		}
+	}		
+
+	if(orderIncomingClient == 0)					// new client
+	{
+		// adding
+		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
+		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
+		pMasterList->numberOfDCs++;
+		dp("[add] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient + 1, pMasterList->numberOfDCs);
+		///log
+	}
+	else											// registered client
+	{
+		if(sMsgData.msgStatus == OFF_LINE)			// status 6
+		{
+			// removing
+			RemoveAndCollapse(orderIncomingClient, pMasterList);
+			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
+			///log
+		}
+		else										// status 1 ~ 5
+		{
+			// updating
+			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
+			dp("[update] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
+			///log
+		}
+	}
 }

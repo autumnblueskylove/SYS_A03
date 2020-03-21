@@ -13,13 +13,9 @@
  *               - do nothing
  */
 
-//cgl
 #include <sys/sem.h>
 #include "../inc/dataCorruptor.h"
-
-extern unsigned short init_values[];
-extern struct sembuf acquire_operation;
-extern struct sembuf release_operation;
+#include "../inc/dataLogger.h"
 
 int main() 
 {

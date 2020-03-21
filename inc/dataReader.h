@@ -1,4 +1,4 @@
-﻿/*
+/*
  * File        : dataReader.h
  * Project     : Hoochmacallit
  * By          : Hyungbum Kim and Charng Gwon Lee
@@ -7,13 +7,15 @@
  *               source file of dataReader.c.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/types.h>
 #include <time.h>
+#include "../inc/msgQueue.h"
+#include "../inc/shdMemory.h"
 
-#define LOOP_FOREVER                    1           // for an infinite loop
-#define TIME_OUT                        35          // for non-responsive clients
-#define FAILURE                         -1
-#define MICRO_SECOND                    1000000
+#define LOOP_FOREVER                1               // for an infinite loop
+#define TIME_OUT                    35              // for non-responsive clients
+#define FAILURE                     -1
+#define MICRO_SECOND                1000000
+
+int RemoveAndCollapse(int, MasterList *);
+void OperationNonResponsive(MasterList *);
+void OperationIncomming(MasterList *, MessageData, time_t);

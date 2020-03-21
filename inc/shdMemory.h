@@ -1,3 +1,15 @@
+/*
+ * File        : dataReader.h
+ * Project     : Hoochmacallit
+ * By          : Hyungbum Kim and Charng Gwon Lee
+ * Date        : March 21, 2020
+ * Description : This header file contains all the required definitions for the
+ *               source file of dataReader.c.
+ */
+
+#ifndef __SHD_MEMORY_H__
+#define __SHD_MEMORY_H__
+
 #define MAX_DC_ROLES                    10          // the maximum number of clients
 
 typedef struct
@@ -12,3 +24,5 @@ typedef struct                          // related to a shared memory structure
     int     numberOfDCs;
     DCInfo  dc[MAX_DC_ROLES];
 } MasterList;
+
+#endif

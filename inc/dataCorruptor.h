@@ -16,27 +16,9 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <unistd.h>
+#include "../inc/shdMemory.h"
 
 #define     MAX_DC_ROLES    10
 #define     DO_NOTING       0
 #define     KILL_DC         1
 #define     DELETE_MSGQ     2
-
-#define     DATA_CREATOR       0
-#define     DATA_MONITOR       1
-#define     DATA_CORRUPTOR     2
-
-void dlog(int progID, int semid, char contents[255]);
-
-typedef struct 
-{
-    pid_t   dcProcessID;
-    int     lastTimeHeardFrom;
-} DCInfo;
-
-typedef struct 
-{
-    int     msgQueueID;
-    int     numberOfDCs;
-    DCInfo  dc[MAX_DC_ROLES];
-} MasterList;
