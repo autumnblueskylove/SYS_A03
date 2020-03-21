@@ -19,6 +19,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include "../inc/dataCreator.h"
+#include "../inc/debug.h"
 
 int main (void)
 {
@@ -61,7 +62,8 @@ int main (void)
             printf ("ERROR: cannot send a message\n");
             return -2;
         }
-        printf("SUCCESS: a message sent\n");
+        dp("[send a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+        
 
         // if(eMsgStatus != OK)
         // {

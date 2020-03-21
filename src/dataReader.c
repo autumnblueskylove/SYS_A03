@@ -21,6 +21,7 @@
 #include <sys/shm.h>
 #include <time.h>
 #include "../inc/dataReader.h"
+#include "../inc/debug.h"
 
 int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {
