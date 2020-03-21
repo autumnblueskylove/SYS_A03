@@ -13,6 +13,7 @@
  *               after writting log messages, close files and Exit semaphore
  */
 
+#define __DATA_LOGGER_H__
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +23,6 @@
 #include <time.h>
 #include "../inc/dataLogger.h"
 
-#define __DATA_LOGGER_H__
 
 // int main ()
 // {

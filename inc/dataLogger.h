@@ -19,6 +19,8 @@
 #define DATA_MONITOR        1
 #define DATA_CORRUPTOR      2
 
+void dlog(int progID, int semid, char contents[255]);
+
 #ifdef __DATA_LOGGER_H__
 
 /*

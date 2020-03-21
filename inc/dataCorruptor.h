@@ -22,5 +22,3 @@
 #define     DO_NOTING       0
 #define     KILL_DC         1
 #define     DELETE_MSGQ     2
-
-void dlog(int progID, int semid, char contents[255]);
