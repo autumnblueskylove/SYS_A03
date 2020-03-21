@@ -22,10 +22,10 @@
 #include <time.h>
 #include "../inc/dataReader.h"
 
-int RemoveAndCollapse(int orderIncomingClient, MasterList *pMasterList)
+int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {
 	// all element except for the last one
-	for(int i=(orderIncomingClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
+	for(int i=(orderClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
 	{
 		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
 		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
