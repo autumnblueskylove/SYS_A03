@@ -56,19 +56,17 @@ int main (void)
 	printf ("(CLIENT) The message queue ID is %d\n", queueID);
 
     printf("LOOP: sending messages");
-	while(eMsgStatus != OFF_LINE)
+	while(LOOP_FOREVER)
 	{
-        sMsgData.msgStatus = eMsgStatus;
         if (msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
         {
             printf ("ERROR: cannot send a message\n");
             return -2;
         }
         dp("[send a message] ID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
-        
-
-        // if(eMsgStatus != OK)
-        // {
+    
+        if(eMsgStatus != OFF_LINE)
+        {
             srand(time(0));
             eMsgStatus = (rand() % 6) + 1;	        // integer: 1 to 6
             sMsgData.msgStatus = eMsgStatus;
@@ -77,7 +75,11 @@ int main (void)
             int i = ((rand() % 2) + 3);              // integer: 10 to 30
             printf("sleep(%d)\n", i);
             sleep(i);              // integer: 10 to 30
-        // }
+        }
+        else
+        {
+            break;                                  // to exit
+        }
 	}
 	return 0;
 }

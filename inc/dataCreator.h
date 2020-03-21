@@ -11,5 +11,5 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TIME_INTERVAL_CHECK_QUEUE       10          // to check for message queue
+#define LOOP_FOREVER                    1           // for an infinite loop
 #define FAILURE                         -1
