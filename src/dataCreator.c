@@ -3,11 +3,10 @@
  * Project     : Hoochmacallit
  * By          : Hyungbum Kim and Charng Gwon Lee
  * Date        : March 21, 2020
- * Description : This program is to generate an S19 download file format or an
- *               assembly file which are both readable by human.
- *               This utility takes any binary input file and fransforms it
- *               into S-Record output file, or an assembly file for use in an
- *               embedded software development environment.
+ * Description : This program is a client application for IPC using the technique
+ *               of message queue. The client generates a status condition representing
+ *               the state of a machine. There are 7 status such as OK, Off-line, Error.
+ *               It sends such a message on a random time basis.
  * 
  */
 
@@ -43,24 +42,23 @@ int main (void)
     
 	messageKey = ftok (".", 1234);                  // same message key as server
 
-	if (messageKey == FAILURE) 
+	if(messageKey == FAILURE) 
 	{ 
 	    printf ("ERROR: cannot allocate a message key\n");
 	    return -1;
 	}
 
 	printf("LOOP: checking for message queue\n");
-	while ((queueID = msgget (messageKey, 0)) == FAILURE) 
+	while((queueID = msgget (messageKey, 0)) == FAILURE) 
 	{
         //sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
-        sleep(1);           // interval to check for message queue
+        sleep(1);
 	}
 	printf ("(CLIENT) The message queue ID is %d\n", queueID);
 
-    printf("LOOP: sending messages");
-	while(LOOP_FOREVER)
+	while(LOOP_FOREVER)                             // MAIN LOOP
 	{
-        if (msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
+        if(msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
         {
             printf ("ERROR: cannot send a message\n");
             return -2;
@@ -83,5 +81,6 @@ int main (void)
             break;                                  // to exit
         }
 	}
+    
 	return 0;
 }

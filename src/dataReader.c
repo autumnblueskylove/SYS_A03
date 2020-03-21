@@ -4,7 +4,7 @@
  * By          : Hyungbum Kim and Charng Gwon Lee
  * Date        : March 21, 2020
  * Description : This program is a server application for IPC using the techniques
- *               both message queur and shared momory. The server keep track of the
+ *               both message queue and shared momory. The server keep track of the
  *               number of different and active clients present in the system. It
  *               can communicate with upto 10 clients.
  */
@@ -22,6 +22,137 @@
 #include "../inc/msgQueue.h"
 #include "../inc/shdMemory.h"
 #include "../inc/debug.h"
+
+int main (void)
+{
+    key_t	 	    messageKey;						// key for a message queue
+	key_t           shmKey;							// key for a shared memory
+	int 		    queueID = -1;                   // message queue ID
+	int             shmId = -1;						// shared memory ID
+    MessageStatus   eMsgStatus;
+    MessageData 	sMsgData;
+	MasterList      *pMasterList;
+	time_t 			t;
+	int             counter = 0;
+	    
+    // initialization 
+	sMsgData.msgType = 0;
+	sMsgData.processID = 0;
+	sMsgData.msgStatus = 0;
+
+    // MESSAGE QUEUE
+    messageKey = ftok (".", 1234);                  // same message key as server
+
+	if (messageKey == FAILURE) 
+	{ 
+	    printf ("ERROR: cannot allocate a message key\n");
+	    return -1;
+	}
+
+    printf("SERVER: checking for message queue\n");
+	if ((queueID = msgget (messageKey, 0)) == FAILURE) 
+	{
+		printf ("(SERVER) No queue available, create!\n");
+
+		queueID = msgget (messageKey, IPC_CREAT | 0660);
+		if (queueID == FAILURE) 
+		{
+			printf ("(SERVER) Cannot allocate a new queue!\n");
+			return -2;
+		}
+	}
+	printf ("(SERVER) The message queue ID is %d\n", queueID);
+
+    // SHARED MEMORY
+	shmKey = ftok (".", 16535);                     // for shared memory
+	if (shmKey == FAILURE) 
+    { 
+        printf ("ERROR: cannot allocate a shared memory key\n");
+	    return -1;
+	}
+
+	if ((shmId = shmget (shmKey, sizeof (MasterList), 0)) == FAILURE) 
+	{
+	    printf ("(SERVER) No Shared-Memory currently available - so create!\n");
+	    shmId = shmget (shmKey, sizeof (MasterList), IPC_CREAT | 0660);
+	    if (shmId == FAILURE) 
+	    {
+	        printf ("(SERVER) Cannot allocate a new memory!\n");
+	        return -2;
+	    }
+	}
+	printf ("(SERVER) The shared-Memory ID is %d\n", shmId);
+
+    // attatch to the shared memory
+	pMasterList = (MasterList *)shmat (shmId, NULL, 0); 
+	if (pMasterList == NULL) 
+	{
+	    printf ("[ERROR] Cannot attach to shared memory!\n");
+	    return -3;
+	}
+
+	// initialize the data of the shared memory our data to blanks
+    pMasterList->msgQueueID = queueID;
+    pMasterList->numberOfDCs = 0;
+	for (counter = 0; counter < MAX_DC_ROLES; counter++) 
+	{
+	    pMasterList->dc[counter].dcProcessID = 0;
+	    pMasterList->dc[counter].lastTimeHeardFrom = 0;
+	}
+
+    // Waiting after allocating the resources
+	printf("stop watch: start, 2 seconds\n");
+    //sleep(15);										// 15 seconds
+    sleep(2);
+
+    while(LOOP_FOREVER) 							// MAIN LOOP
+    {
+		// initialization
+		t = 0;
+
+        // a message on the queue shall be received
+		if((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
+        {
+            printf ("ERROR: cannot receive a message\n");
+            break;
+        }
+		else
+		{
+			dp("[receive] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
+			// Get the localtime 
+			t = time(NULL);
+		}
+
+		//1st operation, processing an incomming message
+		OperationIncomming(pMasterList, sMsgData, t);
+
+		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
+		OperationNonResponsive(pMasterList);
+
+		//3rd operation, checking if all clients are removed from the list
+		if(pMasterList->numberOfDCs == 0)
+		{
+			//log: The total number of machines reaches zero, then TERMINATING
+			break;
+		}
+
+		//4th operation, being suspended for a while before going back to check new message
+		usleep(1.5 * MICRO_SECOND);    					// 1.5 seconds
+    }
+
+	// release the queue
+	msgctl(queueID, IPC_RMID, (struct msqid_ds *)NULL);
+
+	// detach the shared memory
+	printf("(SERVER) Detaching from Shared-Memory\n");
+	shmdt(pMasterList);
+	
+    // release the shared memory
+    printf("(SERVER) Removing the Shared-Memory resource\n");
+	shmctl(shmId, IPC_RMID, (struct shmid_ds *)NULL);
+
+    return 0;
+}
 
 int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {
@@ -41,7 +172,7 @@ int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 
 	if(pMasterList->numberOfDCs < 0)
 	{
-		//ERROR: unknown
+		printf("[ERROR] unknown error\n");
 		return -11;
 	}
 }
@@ -86,7 +217,6 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 	int counter = 0;
 	int orderIncomingClient = 0;					// the order of the registered client in the list, 
 	                                        		// ... whose process id is same as the new one
-
 	// seaching for the client of the same process id
 	for(counter = 0; counter < pMasterList->numberOfDCs; counter++)
 	{
@@ -123,138 +253,4 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 			///log
 		}
 	}
-}
-
-int main (void)
-{
-    key_t	 	    messageKey;						// key for a message queue
-	key_t           shmKey;							// key for a shared memory
-	int 		    queueID = -1;                   // message queue ID
-	int             shmId = -1;						// shared memory ID
-    MessageStatus   eMsgStatus;
-    MessageData 	sMsgData;
-	MasterList      *pMasterList;
-	time_t 			t;
-    struct tm*      localTime;  
-	int             counter = 0;
-	    
-    // initialization 
-	sMsgData.msgType = 0;
-	sMsgData.processID = 0;
-	sMsgData.msgStatus = 0;
-
-    // MESSAGE QUEUE
-    messageKey = ftok (".", 1234);                  // same message key as server
-
-	if (messageKey == FAILURE) 
-	{ 
-	    printf ("ERROR: cannot allocate a message key\n");
-	    return -1;
-	}
-
-    printf("SERVER: checking for message queue\n");
-	if ((queueID = msgget (messageKey, 0)) == FAILURE) 
-	{
-		printf ("(SERVER) No queue available, create!\n");
-
-		queueID = msgget (messageKey, IPC_CREAT | 0660);
-		if (queueID == FAILURE) 
-		{
-			printf ("(SERVER) Cannot allocate a new queue!\n");
-			return -2;
-		}
-	}
-	printf ("(SERVER) The message queue ID is %d\n", queueID);
-
-    // SHARED MEMORY
-	shmKey = ftok (".", 16535);                     // for shared memory
-	if (shmKey == FAILURE) 
-    { 
-        printf ("ERROR: cannot allocate a shared memory key\n");
-	    return -1;
-	}
-
-	if ((shmId = shmget (shmKey, sizeof (MasterList), 0)) == FAILURE) 
-	{
-	    printf ("(PRODUCER) No Shared-Memory currently available - so create!\n");
-	    shmId = shmget (shmKey, sizeof (MasterList), IPC_CREAT | 0660);
-	    if (shmId == FAILURE) 
-	    {
-	        printf ("(PRODUCER) Cannot allocate a new memory!\n");
-	        return -2;
-	    }
-	}
-
-	printf ("(PRODUCER) Our Shared-Memory ID is %d\n", shmId);
-
-    // attatch to the shared memory
-	pMasterList = (MasterList *)shmat (shmId, NULL, 0); 
-	if (pMasterList == NULL) 
-	{
-	    printf ("(PRODUCER) Cannot attach to shared memory!\n");
-	    return -3;
-	}
-
-	// initialize the data of the shared memory our data to blanks
-    pMasterList->msgQueueID = queueID;
-    pMasterList->numberOfDCs = 0;
-	for (counter = 0; counter < MAX_DC_ROLES; counter++) 
-	{
-	    pMasterList->dc[counter].dcProcessID = 0;
-	    pMasterList->dc[counter].lastTimeHeardFrom = 0;
-	}
-
-    // Waiting after allocating the resources
-	printf("stop watch: start, 2 seconds\n");
-    //sleep(15);
-    sleep(2);
-
-    // MAIN LOOP
-    while(LOOP_FOREVER) 
-    {
-		// initialization
-		t = 0;
-
-        // a message on the queue shall be received
-		if ((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
-        {
-            // ERROR
-            break;
-        }
-		else
-		{
-			dp("[receive] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
-			// Get the localtime 
-			t = time(NULL);
-		}
-
-		//1st operation, processing an incomming message
-		OperationIncomming(pMasterList, sMsgData, t);
-
-		//2nd operation, checking if there is a non-responsive client during more than 35 seconds
-		OperationNonResponsive(pMasterList);
-
-		//3rd operation, checking if all clients are removed from the list
-		if(pMasterList->numberOfDCs == 0)
-		{
-			//log: The total number of machines reaches zero, then TERMINATING
-			break;
-		}
-
-		//4th operation, being suspended for a while before going back to check new message
-		usleep(1.5 * MICRO_SECOND);    					// 1.5 seconds
-    }
-
-	// release the queue
-	msgctl (queueID, IPC_RMID, (struct msqid_ds *)NULL);
-
-	// detach the shared memory
-	printf("(PRODUCER) Detaching from Shared-Memory\n");
-	shmdt (pMasterList);
-	
-    // release the shared memory
-    printf("(PRODUCER) Removing the Shared-Memory resource\n");
-	shmctl (shmId, IPC_RMID, (struct shmid_ds *)NULL);
-
-    return 0;
 }
