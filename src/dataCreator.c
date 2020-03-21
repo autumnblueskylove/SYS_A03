@@ -19,6 +19,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include "../inc/dataCreator.h"
+#include "../inc/msgQueue.h"
 #include "../inc/debug.h"
 
 int main (void)
@@ -57,7 +58,7 @@ int main (void)
 	while(eMsgStatus != OFF_LINE)
 	{
         sMsgData.msgStatus = eMsgStatus;
-        if (msgsnd (queueID, (void *)&sMsgData, sizeof(int), 0) == FAILURE) 
+        if (msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
         {
             printf ("ERROR: cannot send a message\n");
             return -2;
