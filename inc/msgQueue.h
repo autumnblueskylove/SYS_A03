@@ -7,10 +7,14 @@
  *               source file of dataCreator.c.
  */
 
+#ifndef __MSG_QUEUE_H__
+#define __MSG_QUEUE_H__
+
 #define MSG_TYPE                        1234        // for message queue
 #define NUM_STATUS                      7           // for the description of the status
 #define NUM_STRING                      40          // for the description of the status
 #define TIME_INTERVAL_CHECK_QUEUE       10          // to check for message queue
+
 
 typedef enum
 {
@@ -40,3 +44,4 @@ const char kDescriptionStatus[NUM_STATUS][NUM_STRING] = {
     "Operator Error",
     "Machine is Off-line"
 };
+#endif

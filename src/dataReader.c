@@ -3,11 +3,10 @@
  * Project     : Hoochmacallit
  * By          : Hyungbum Kim and Charng Gwon Lee
  * Date        : March 21, 2020
- * Description : This program is to generate an S19 download file format or an
- *               assembly file which are both readable by human.
- *               This utility takes any binary input file and fransforms it
- *               into S-Record output file, or an assembly file for use in an
- *               embedded software development environment.
+ * Description : This program is a server application for IPC using the techniques
+ *               both message queur and shared momory. The server keep track of the
+ *               number of different and active clients present in the system. It
+ *               can communicate with upto 10 clients.
  */
 
 #include <stdio.h>
@@ -15,7 +14,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
-#include <time.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/msg.h>
@@ -24,11 +22,6 @@
 #include "../inc/msgQueue.h"
 #include "../inc/shdMemory.h"
 #include "../inc/debug.h"
-
-#define LOOP_FOREVER                    1           // for an infinite loop
-#define TIME_OUT                        35          // for non-responsive clients
-#define FAILURE                         -1
-#define MICRO_SECOND                    1000000
 
 int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
 {

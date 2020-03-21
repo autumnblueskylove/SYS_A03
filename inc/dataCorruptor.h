@@ -26,17 +26,6 @@
 #define     DATA_MONITOR       1
 #define     DATA_CORRUPTOR     2
 
+#include "../inc/shdMemory.h"
+
 void dlog(int progID, int semid, char contents[255]);
-
-typedef struct 
-{
-    pid_t   dcProcessID;
-    int     lastTimeHeardFrom;
-} DCInfo;
-
-typedef struct 
-{
-    int     msgQueueID;
-    int     numberOfDCs;
-    DCInfo  dc[MAX_DC_ROLES];
-} MasterList;
