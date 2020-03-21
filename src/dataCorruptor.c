@@ -6,7 +6,11 @@
  * Description : This program is to corrupt data between DC and DR.
  *               Through killing DC process or deleting the message
  *               queue being used between the set of DC and DR, create
- *               ealternative (or exceptional) paths to test program.
+ *               ealternative (or exceptional) paths to test program
+ *               using WOD (Wheel of Destruction) 
+ *               - kill process
+ *               - delete message queue
+ *               - do nothing
  */
 
 //cgl
@@ -14,8 +18,8 @@
 #include "../inc/dataCorruptor.h"
 
 extern unsigned short init_values[];
-extern struct sembuf acquire_oper;
-extern struct sembuf release_oper;
+extern struct sembuf acquire_operation;
+extern struct sembuf release_operation;
 
 int main() 
 {
@@ -29,6 +33,7 @@ int main()
     char temp[255];
     int actionNum = 0;
 
+    // get key for shared memory
     shmem_key = ftok(".", 16535);
     if(shmem_key == -1)
     {
@@ -36,22 +41,27 @@ int main()
         return 1;
     }
     
+    // 100 retry to get shared memory
     for(int i = 0 ; i < 100; i++)
     {
+        // If shared memory has not yet created
         if((shmid = shmget(shmem_key, sizeof(MasterList),0))== -1)
         {
+            // sleep for 10 sec and try again
             sleep(10);
         }
         else
         {
             break;
         }
+        // Cannot find 10sec * 100 times  then exit program.
         if(i == 99)
         {
             exit(0);
         }     
     }
 
+    // attach to shared memory
     p = (MasterList *)shmat (shmid, NULL, 0);
     if(p == NULL)
     {
@@ -96,8 +106,10 @@ int main()
             exit(3);
         }
 
+        // select random number for WOD
         r = rand() % 3;
 
+        //WOD (Wheel of Destruction)
         switch(r)
         {
             case DO_NOTING:
