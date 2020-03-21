@@ -109,8 +109,9 @@ int main (void)
 	int             counter = 0;
 	    
     // initialization 
-	sMsgData.msgStatus = 0;
 	sMsgData.msgType = 0;
+	sMsgData.processID = 0;
+	sMsgData.msgStatus = 0;
 
     // MESSAGE QUEUE
     messageKey = ftok (".", 1234);                  // same message key as server
