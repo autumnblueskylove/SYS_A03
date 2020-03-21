@@ -19,6 +19,7 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include "../inc/msgQueue.h"
+#include "../inc/dataLogger.h"
 #include "../inc/debug.h"
 
 #define LOOP_FOREVER                    1           // for an infinite loop

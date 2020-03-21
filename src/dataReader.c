@@ -21,6 +21,7 @@
 #include "../inc/dataReader.h"
 #include "../inc/msgQueue.h"
 #include "../inc/shdMemory.h"
+#include "../inc/dataLogger.h"
 #include "../inc/debug.h"
 
 int main (void)
