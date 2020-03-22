@@ -8,6 +8,7 @@
  *               number of different and active clients present in the system. It
  *               can communicate with upto 10 clients.
  */
+#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,8 +21,6 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include "../inc/dataReader.h"
-#include "../inc/msgQueue.h"
-#include "../inc/shdMemory.h"
 #include "../inc/dataLogger.h"
 #include "../inc/debug.h"
 
@@ -132,15 +131,15 @@ int main (void)
 		}
 
 		// 1st operation, processing an incomming message
-		OperationIncomming(pMasterList, sMsgData, t);
+		OperationIncomming(pMasterList, sMsgData, t, semId);
 
 		// 2nd operation, checking if there is a non-responsive client during more than 35 seconds
-		OperationNonResponsive(pMasterList);
+		OperationNonResponsive(pMasterList, semId);
 
 		// 3rd operation, checking if all clients are removed from the list
 		if(pMasterList->numberOfDCs == 0)
 		{
-			//log: The total number of machines reaches zero, then TERMINATING
+			///log: The total number of machines reaches zero, then TERMINATING
 			break;
 		}
 
@@ -167,27 +166,29 @@ int main (void)
  * Description	: This function gets rid of an element of a list collapsing the list.
  * Parameters	: int orderClient 			: indicates the element of clients registerd
  *                MasterList *pMasterList	: a list for registerd clients
- * Returns		: int    				: if SUCESS, returns (0), if FIALURE, returns (-11)
+ * 				  int semId					: a semaphore id
+ * Returns		: int    					: if SUCESS, returns (0), if FIALURE, returns (-11)
  */
-int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
+int RemoveAndCollapse(int orderClient, MasterList *pMasterList, int semId)
 {
+	int counter = 0;
 	// all element except for the last one
-	for(int i=(orderClient - 1); i< (pMasterList->numberOfDCs - 1); i++)  
+	for(counter = (orderClient - 1); counter < (pMasterList->numberOfDCs - 1); counter++)
 	{
-		pMasterList->dc[i].dcProcessID = pMasterList->dc[i+1].dcProcessID;
-		pMasterList->dc[i].lastTimeHeardFrom = pMasterList->dc[i+1].lastTimeHeardFrom;
+		pMasterList->dc[counter].dcProcessID = pMasterList->dc[counter+1].dcProcessID;
+		pMasterList->dc[counter].lastTimeHeardFrom = pMasterList->dc[counter+1].lastTimeHeardFrom;
 	}
 
 	// the last one
 	pMasterList->dc[pMasterList->numberOfDCs -1].dcProcessID =	0;
 	pMasterList->dc[pMasterList->numberOfDCs -1].lastTimeHeardFrom = 0;
 
-	// decrease in the total number of whole clients
+	// decreasing in the total number of whole clients
 	pMasterList->numberOfDCs--;						
 
 	if(pMasterList->numberOfDCs < 0)
-	{
-		printf("[ERROR] unknown error\n");
+	{	// ERROR: unknown
+		dlog(DATA_MONITOR, semId, "DM - EROOR: unknown");
 		return -11;
 	}
 
@@ -199,37 +200,44 @@ int RemoveAndCollapse(int orderClient, MasterList *pMasterList)
  * Description	: This function searches non-responsive clients, and then
  *                removes them from a list.
  * Parameters	: MasterList *pMasterList	: a list for registerd clients
+ * 				  int semId					: a semaphore id
  * Returns		: nothing
  */
-void OperationNonResponsive(MasterList *pMasterList)
+void OperationNonResponsive(MasterList *pMasterList, int semId)
 {
-	time_t t;
-	int counter = 0;
 	int orderNonResponsiveClient = 0;				// 0: no non-responsive client
 	int startingPointConsecutive = 0;				// consecutive starting point for the counter
+	char strLog[MAX_STRING_LOG];         			// for logging
+	int counter = 0;
+	time_t t;
 
 	while(LOOP_FOREVER)						
 	{
-		//initialization
+		// initialization
 		orderNonResponsiveClient = 0;
 
 		// searching for non-responsive clients
 		for(counter = startingPointConsecutive; counter < pMasterList->numberOfDCs; counter++)
 		{
 			t = time(NULL);
-			if( (t - pMasterList->dc[counter].lastTimeHeardFrom) > TIME_OUT)     
-			{	//more than 35 seconds
+			if((t - pMasterList->dc[counter].lastTimeHeardFrom) > TIME_OUT)	// more than 35 seconds     
+			{	
 				startingPointConsecutive = counter;
 				orderNonResponsiveClient = counter + 1;
 				break;
 			} 
 		}
-		// log1: non-responsive
 		if(orderNonResponsiveClient > 0)
 		{
-			RemoveAndCollapse(orderNonResponsiveClient, pMasterList);
+			RemoveAndCollapse(orderNonResponsiveClient, pMasterList, semId);
+
+			// logging the activity of removing the element from the list (non-responsive)
+			sprintf (strLog, "DC-%02d [%d] removed from master list - NON-RESPONSIVE", 
+				orderNonResponsiveClient, pMasterList->dc[orderNonResponsiveClient - 1].dcProcessID);
+			dlog(DATA_MONITOR, semId, strLog);
+			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderNonResponsiveClient, pMasterList->numberOfDCs);
 		}
-		else
+		else										// no non-responsive client
 		{
 			break;
 		}
@@ -243,11 +251,13 @@ void OperationNonResponsive(MasterList *pMasterList)
  * Parameters	: MasterList *pMasterList   : a list for registerd clients
  *                MessageData sMsgData      : a list for registerd clients
  *                time_t t                  : indicates a calendar time
+ * 				  int semId					: a semaphore id
  * Returns		: nothing
  */
-void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
+void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t, int semId)
 {
 	int counter = 0;
+	char strLog[MAX_STRING_LOG];         			// for logging
 	int orderIncomingClient = 0;					// the order of the registered client in the list, 
 	                                        		// ... whose process id is same as the new one
 	// searching for the client of the same process id
@@ -266,24 +276,36 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t)
 		pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
 		pMasterList->dc[pMasterList->numberOfDCs].lastTimeHeardFrom = t;
 		pMasterList->numberOfDCs++;
+
+		// logging the activity of adding a new element to the list
+		sprintf (strLog, "DC-%02d [%d] added to the master list - NEW DC - Status %d (%s)", 
+			orderIncomingClient, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+		dlog(DATA_MONITOR, semId, strLog);
 		dp("[add] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient + 1, pMasterList->numberOfDCs);
-		///log
 	}
 	else											// registered client
 	{
 		if(sMsgData.msgStatus == OFF_LINE)			// status 6
 		{
 			// removing
-			RemoveAndCollapse(orderIncomingClient, pMasterList);
+			RemoveAndCollapse(orderIncomingClient, pMasterList, semId);
+
+       		 // logging the activity of removing the element from the list (OFFLINE)
+			sprintf (strLog, "DC-%02d [%d] has gone OFFLINE - removing from master-list", 
+				orderIncomingClient, sMsgData.processID);
+			dlog(DATA_MONITOR, semId, strLog);
 			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
-			///log
 		}
 		else										// status 1 ~ 5
 		{
 			// updating
 			pMasterList->dc[orderIncomingClient - 1].lastTimeHeardFrom = t;
+
+       		 // logging the activity of updating the list
+			sprintf (strLog, "DC-%02d [%d] updated in the master list - MSG RECEIVED - Satus %d (%s)", 
+				orderIncomingClient, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+			dlog(DATA_MONITOR, semId, strLog);
 			dp("[update] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
-			///log
 		}
 	}
 }

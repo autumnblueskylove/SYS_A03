@@ -18,6 +18,6 @@
 #define TIME_ALLOC_SLEEP            2 // 15
 #define TIME_MICRO_NEXT             1.5
 
-int RemoveAndCollapse(int, MasterList *);
-void OperationNonResponsive(MasterList *);
-void OperationIncomming(MasterList *, MessageData, time_t);
+int RemoveAndCollapse(int, MasterList *, int);
+void OperationNonResponsive(MasterList *, int);
+void OperationIncomming(MasterList *, MessageData, time_t, int);

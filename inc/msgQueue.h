@@ -11,6 +11,8 @@
 #define __MSG_QUEUE_H__
 
 #define MSG_TYPE                        1234        // for message queue
+#define NUM_STATUS                      7           // for the description of the status
+#define NUM_STRING                      40          // for the description of the status
 
 typedef enum
 {
@@ -30,3 +32,14 @@ typedef struct
 	int msgStatus;
 } MessageData;
 #endif
+
+// description of the client's status
+const char kDescriptionStatus[NUM_STATUS][NUM_STRING] = { 
+    "Everything is OKAY",
+    "Hydraulic Pressure Failure",
+    "Safety Button Failure",
+    "No Raw Material in the Process",
+    "Operating Temperature Out of Range",
+    "Operator Error",
+    "Machine is Off-line"
+};
