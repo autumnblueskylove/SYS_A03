@@ -15,6 +15,8 @@
 #define TIME_OUT                    35              // for non-responsive clients
 #define FAILURE                     -1
 #define MICRO_SECOND                1000000
+#define TIME_ALLOC_SLEEP            2 // 15
+#define TIME_MICRO_NEXT             1.5
 
 int RemoveAndCollapse(int, MasterList *);
 void OperationNonResponsive(MasterList *);

@@ -56,13 +56,12 @@ int main (void)
     // setting up message queue
 	messageKey = ftok (".", 1234);                  // same message key as server's one
 	if(messageKey == FAILURE) 
-	{   // ERROR: cannot allocate a message key
-        dlog(DATA_CREATOR, semId, "DC [%d] - EROOR: cannot allocate any message key");
+	{   // ERROR: cannot allocate any message key
+        dlog(DATA_CREATOR, semId, "DC - EROOR: cannot allocate any message key");
 	    return -3;
 	}
-
-    // getting for message queue...
-	while((queueID = msgget (messageKey, 0)) == FAILURE) 
+    // getting or creating message queue...
+	while((queueID = msgget(messageKey, 0)) == FAILURE) 
 	{
         sleep(TIME_INTERVAL_CHECK_QUEUE);           // interval to check for message queue
 	}
@@ -72,7 +71,7 @@ int main (void)
 	{
         if(msgsnd (queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), 0) == FAILURE) 
         {   // ERROR: cannot send a message
-            dlog(DATA_CREATOR, semId, "DC [%d] - EROOR: cannot send any message");
+            dlog(DATA_CREATOR, semId, "DC - EROOR: cannot send any message");
             return -4;
         }
         dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
