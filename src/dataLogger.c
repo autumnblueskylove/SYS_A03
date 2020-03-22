@@ -23,31 +23,6 @@
 #include <time.h>
 #include "../inc/dataLogger.h"
 
-
-// int main ()
-// {
-//     int semid;
-//     // get semaphore ID
-//     semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
-//     if(semid == -1)
-//     {
-//         printf("(Logger) Cannot get semid\n");
-//         exit(1);
-//     }
-//     printf ("(Logger) semID is %d\n", semid);
-//     if(semctl(semid, 0, SETALL, init_values) == -1)
-//     {
-//          printf("(Logger) Cannot initialize semid\n");
-//         exit(2);
-//     }
-//     dlog(DATA_CORRUPTOR,semid,"Hello World");
-
-//     printf ("(Logger) Release the semaphores\n");
-//     semctl (semid, 0, IPC_RMID,0);
-//     return 1;
-// }
-
-
 /* =============================================================================*/
 /* Name		: dlog                              								*/
 /* PURPOSE  : to log each action of DC, DR, and DX Application					*/
