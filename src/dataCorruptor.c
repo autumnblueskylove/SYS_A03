@@ -124,6 +124,7 @@ int wod(int shmid, int semid)
     }
 
     // selecting random number for WOD
+    srand(time(0));
     r = rand() % 3;
 
     //WOD (Wheel of Destruction)
@@ -134,6 +135,7 @@ int wod(int shmid, int semid)
             dlog(DATA_CORRUPTOR,semid,"do nothing");
             break;
         case KILL_DC:
+            srand(time(0));
             r = rand() % (p->numberOfDCs);
             pid = (p->dc[r]).dcProcessID;
             kill(pid, SIGHUP);
