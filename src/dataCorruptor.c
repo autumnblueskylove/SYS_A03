@@ -76,7 +76,13 @@ int main()
     return 0;
 }
 
-
+/*
+ * Function		: wod()
+ * Description	: This function is to log each action of DC, DR, and DX Application.
+ * Parameters	: int shmid 		: shared memory ID
+ *                int semid 	    : semaphore ID for cretical section 
+ * Returns		: int
+ */
 int wod(int shmid, int semid)
 {
     int     actionNum = 0;

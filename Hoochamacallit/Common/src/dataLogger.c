@@ -21,6 +21,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <time.h>
+<<<<<<< HEAD
 #include "../../Common/inc/dataLogger.h"
 
 
@@ -33,7 +34,18 @@
 /*            contents   char array   - message for writting log files          */
 /* RETURNS  : Nothing															*/
 /* =============================================================================*/
+=======
+#include "../inc/dataLogger.h"
+>>>>>>> 6e42940c34562a203c19e7933591306789fa5239
 
+/*
+ * Function		: dlog()
+ * Description	: This function is to log each action of DC, DR, and DX Application.
+ * Parameters	: int progID 		: program ID of DC, DR, and DX  
+ *                int semid 	    : semaphore ID for cretical section 
+ * 				  char contents[]   : message for writting log files  
+ * Returns		: nothing
+ */
 void dlog(int progID, int semid, char contents[MAX_STRING_LOG])
 {
     char filePath[MAX_STRING_LOG] = {""};
