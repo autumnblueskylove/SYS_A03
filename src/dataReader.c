@@ -22,9 +22,6 @@
 #include <sys/sem.h>
 #include "../inc/dataReader.h"
 #include "../inc/dataLogger.h"
-#include "../inc/debug.h"
-
-#define DEBUG 1
 
 int main (void)
 {
@@ -48,11 +45,11 @@ int main (void)
     // setting up semaphore
     semId = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
     if(semId == FAILURE)
-    {   // EROOR: cannot get any semaphore id
+    {   // ERROR: cannot get any semaphore id
         return -1;
     }
     if(semctl(semId, 0, SETALL, init_values) == FAILURE)
-    {   // EROOR: cannot initialize semaphore
+    {   // ERROR: cannot initialize semaphore
         return -2;
     }
 
@@ -60,7 +57,7 @@ int main (void)
     messageKey = ftok (".", 1234);                  // same message key as server
 	if(messageKey == FAILURE) 
 	{   // ERROR: cannot allocate a message key
-        dlog(DATA_MONITOR, semId, "DM - EROOR: cannot allocate any message key");
+        dlog(DATA_MONITOR, semId, "DR - ERROR: cannot allocate any message key");
 	    return -3;
 	}
     // getting or creating message queue...
@@ -69,17 +66,16 @@ int main (void)
 		queueID = msgget(messageKey, IPC_CREAT | 0660);
 		if(queueID == FAILURE) 
 		{
-			dlog(DATA_MONITOR, semId, "DM - EROOR: cannot allocate any message key");
+			dlog(DATA_MONITOR, semId, "DR - ERROR: cannot allocate any message key");
 			return -4;
 		}
 	}
-	dp("The message queue ID is %d\n", queueID);
 
     // setting up shared memory
 	shmKey = ftok (".", 16535);                     // for shared memory
 	if(shmKey == FAILURE) 
     { 	// ERROR: cannot allocate any shared memory key
-		dlog(DATA_MONITOR, semId, "DM - EROOR: cannot allocate any shared memory key");
+		dlog(DATA_MONITOR, semId, "DR - ERROR: cannot allocate any shared memory key");
 	    return -5;
 	}
 	if((shmId = shmget(shmKey, sizeof (MasterList), 0)) == FAILURE) 
@@ -87,16 +83,16 @@ int main (void)
 	    shmId = shmget(shmKey, sizeof (MasterList), IPC_CREAT | 0660);
 	    if(shmId == FAILURE) 
 	    {	// ERROR: cannot allocate any shared memory
-			dlog(DATA_MONITOR, semId, "DM - EROOR: cannot allocate any shared memory");
+			dlog(DATA_MONITOR, semId, "DR - ERROR: cannot allocate any shared memory");
 	        return -6;
 	    }
 	}
-	dp("The shared-Memory ID is %d\n", shmId);
+
     // attatching to the shared memory
 	pMasterList = (MasterList *)shmat (shmId, NULL, 0); 
 	if (pMasterList == NULL) 
 	{	// ERROR: cannot attach to shared memory
-		dlog(DATA_MONITOR, semId, "DM - EROOR: cannot attach to shared memory");
+		dlog(DATA_MONITOR, semId, "DR - ERROR: cannot attach to shared memory");
 	    return -7;
 	}
 	// initialize the data of the shared memory
@@ -120,12 +116,11 @@ int main (void)
         // receiving a message on the queue
 		if((msgrcv(queueID, (void *)&sMsgData, (sizeof(MessageData) - sizeof(long)), MSG_TYPE, 0)) == FAILURE)
         {	// ERROR: ERROR: cannot receive any message
-			dlog(DATA_MONITOR, semId, "DM - EROOR: cannot receive any message");
+			dlog(DATA_MONITOR, semId, "DR - ERROR: cannot receive any message");
             break;
         }
 		else
 		{
-			dp("[receive] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 			// getting the localtime 
 			t = time(NULL);
 		}
@@ -141,8 +136,6 @@ int main (void)
 		{
 			// logging the event of TERMINATING because the total number of machines reaches zero
 			dlog(DATA_MONITOR, semId, "All DCs have gone offline or terminated - DR TERMINATING");
-			dp("[terminate] totalClient: %d\n", pMasterList->numberOfDCs);
-
 			break;
 		}
 
@@ -154,11 +147,9 @@ int main (void)
 	msgctl(queueID, IPC_RMID, (struct msqid_ds *)NULL);
 
 	// detaching the shared memory
-	dp("Detaching from Shared-Memory\n");
 	shmdt(pMasterList);
 	
     // releasing the shared memory
-    dp("Removing the Shared-Memory resource\n");
 	shmctl(shmId, IPC_RMID, (struct shmid_ds *)NULL);
 
     return 0;
@@ -191,7 +182,7 @@ int RemoveAndCollapse(int orderClient, MasterList *pMasterList, int semId)
 
 	if(pMasterList->numberOfDCs < 0)
 	{	// ERROR: unknown
-		dlog(DATA_MONITOR, semId, "DM - EROOR: unknown");
+		dlog(DATA_MONITOR, semId, "DR - ERROR: unknown");
 		return -11;
 	}
 
@@ -233,7 +224,7 @@ void OperationNonResponsive(MasterList *pMasterList, int semId)
 		if(orderNonResponsiveClient > 0)
 		{
 			int dcProcessID = pMasterList->dc[orderNonResponsiveClient - 1].dcProcessID;
-			
+
 			// removing
 			RemoveAndCollapse(orderNonResponsiveClient, pMasterList, semId);
 
@@ -241,7 +232,6 @@ void OperationNonResponsive(MasterList *pMasterList, int semId)
 			sprintf (strLog, "DC-%02d [%d] removed from master list - NON-RESPONSIVE", 
 				orderNonResponsiveClient, dcProcessID);
 			dlog(DATA_MONITOR, semId, strLog);
-			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderNonResponsiveClient, pMasterList->numberOfDCs);
 		}
 		else										// no non-responsive client
 		{
@@ -287,7 +277,6 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 		sprintf (strLog, "DC-%02d [%d] added to the master list - NEW DC - Status %d (%s)", 
 			orderIncomingClient + 1, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
 		dlog(DATA_MONITOR, semId, strLog);
-		dp("[add] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient + 1, pMasterList->numberOfDCs);
 	}
 	else											// registered client
 	{
@@ -300,7 +289,6 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 			sprintf (strLog, "DC-%02d [%d] has gone OFFLINE - removing from master-list", 
 				orderIncomingClient, sMsgData.processID);
 			dlog(DATA_MONITOR, semId, strLog);
-			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 		}
 		else										// status 1 ~ 5
 		{
@@ -311,7 +299,6 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 			sprintf (strLog, "DC-%02d [%d] updated in the master list - MSG RECEIVED - Satus %d (%s)", 
 				orderIncomingClient, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
 			dlog(DATA_MONITOR, semId, strLog);
-			dp("[update] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient, pMasterList->numberOfDCs);
 		}
 	}
 }
