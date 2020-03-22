@@ -21,7 +21,6 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <time.h>
-<<<<<<< HEAD
 #include "../../Common/inc/dataLogger.h"
 
 
@@ -34,9 +33,6 @@
 /*            contents   char array   - message for writting log files          */
 /* RETURNS  : Nothing															*/
 /* =============================================================================*/
-=======
-#include "../inc/dataLogger.h"
->>>>>>> 6e42940c34562a203c19e7933591306789fa5239
 
 /*
  * Function		: dlog()
