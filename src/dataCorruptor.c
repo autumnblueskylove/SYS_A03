@@ -19,6 +19,7 @@
 
 int main() 
 {
+<<<<<<< HEAD
     int             shmid;
     int             semid;
     int             r;
@@ -39,6 +40,17 @@ int main()
          printf("(DX) Cannot initialize semid\n");
         exit(2);
     }
+=======
+    int shmid;
+    int mid;
+    int semid;
+    pid_t pid;
+    int r;
+    key_t shmem_key;
+    MasterList *p;
+    char temp[MAX_STRING_LOG];
+    int actionNum = 0;
+>>>>>>> 51239f8a9f362b751551ea21e5ee809fcaca9cd5
 
     // get key for shared memory
     shmem_key = ftok(".", 16535);

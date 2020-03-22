@@ -18,8 +18,8 @@
 #define DATA_CREATOR        0
 #define DATA_MONITOR        1
 #define DATA_CORRUPTOR      2
-
-void dlog(int progID, int semid, char contents[255]);
+#define MAX_STRING_LOG      255     // maximum length of string for logging
+void dlog(int progID, int semid, char contents[MAX_STRING_LOG]);
 
 #ifdef __DATA_LOGGER_H__
 
