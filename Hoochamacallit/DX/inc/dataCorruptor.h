@@ -16,11 +16,13 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <unistd.h>
-#include "../../Common/inc/shdMemory.h"
+#include "../inc/shdMemory.h"
 
-#define     MAX_DC_ROLES    10
-#define     DO_NOTING       0
-#define     KILL_DC         1
-#define     DELETE_MSGQ     2
+#define LOOP_FOREVER                    1       // for an infinite loop
+#define KILL_DC                         1       // to kill a client
+#define DELETE_MSGQ                     2       // to delete message queue
+#define DO_NOTING                       0
+#define TIME_RANGE_SLEEP                21          
+#define TIME_MIN_SLEEP                  10
 
 int wod(int shmid, int semid);

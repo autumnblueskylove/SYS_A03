@@ -21,43 +21,16 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <time.h>
-#include "../../Common/inc/dataLogger.h"
+#include "../inc/dataLogger.h"
 
-
-// int main ()
-// {
-//     int semid;
-//     // get semaphore ID
-//     semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
-//     if(semid == -1)
-//     {
-//         printf("(Logger) Cannot get semid\n");
-//         exit(1);
-//     }
-//     printf ("(Logger) semID is %d\n", semid);
-//     if(semctl(semid, 0, SETALL, init_values) == -1)
-//     {
-//          printf("(Logger) Cannot initialize semid\n");
-//         exit(2);
-//     }
-//     dlog(DATA_CORRUPTOR,semid,"Hello World");
-
-//     printf ("(Logger) Release the semaphores\n");
-//     semctl (semid, 0, IPC_RMID,0);
-//     return 1;
-// }
-
-
-/* =============================================================================*/
-/* Name		: dlog                              								*/
-/* PURPOSE  : to log each action of DC, DR, and DX Application					*/
-/*			  - set the default value											*/
-/* INPUTS   : progID     int	      - program ID of DC, DR, and DX    		*/
-/*            semid      int          - semaphore ID for cretical section       */
-/*            contents   char array   - message for writting log files          */
-/* RETURNS  : Nothing															*/
-/* =============================================================================*/
-
+/*
+ * Function		: dlog()
+ * Description	: This function is to log each action of DC, DR, and DX Application.
+ * Parameters	: int progID 		: program ID of DC, DR, and DX  
+ *                int semid 	    : semaphore ID for cretical section 
+ * 				  char contents[]   : message for writting log files  
+ * Returns		: nothing
+ */
 void dlog(int progID, int semid, char contents[MAX_STRING_LOG])
 {
     char filePath[MAX_STRING_LOG] = {""};
