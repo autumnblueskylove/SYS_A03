@@ -80,7 +80,16 @@ int main()
     return (0);
 }
 
-
+/* =============================================================================*/
+/* Name		: wod                              								    */
+/* PURPOSE  : to do exceptional test, kill process, delete message queue	    */
+/*            in the middle of communication between DR and DC                  */
+/* INPUTS   : shmid      int	      - shared memory ID for Master List       	*/
+/*            semid      int          - semaphore ID for cretical section       */
+/* RETURNS  : int                     -1 :  Cannot attach to shared memory		*/
+/*                                     0 :  DX deteched that msgQ is gone       */
+/*                                     1 :  success                             */
+/* =============================================================================*/
 int wod(int shmid, int semid)
 {
     int     actionNum = 0;
