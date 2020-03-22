@@ -19,7 +19,6 @@
 
 int main() 
 {
-<<<<<<< HEAD
     int             shmid;
     int             semid;
     int             r;
@@ -31,32 +30,24 @@ int main()
     semid = semget (IPC_PRIVATE, 1, IPC_CREAT | 0666);
     if(semid == -1)
     {
-        printf("(DX) Cannot get semid\n");
+        //printf("(DX) Cannot get semid\n");
+        dlog(DATA_CORRUPTOR,semid,"(DX) Cannot get semid");
         exit(1);
     }
-    printf ("(DX) semID is %d\n", semid);
+    //printf ("(DX) semID is %d\n", semid);
     if(semctl(semid, 0, SETALL, init_values) == -1)
     {
-         printf("(DX) Cannot initialize semid\n");
+         //printf("(DX) Cannot initialize semid\n");
+         dlog(DATA_CORRUPTOR,semid,"(DX) Cannot initialize semid!");
         exit(2);
     }
-=======
-    int shmid;
-    int mid;
-    int semid;
-    pid_t pid;
-    int r;
-    key_t shmem_key;
-    MasterList *p;
-    char temp[MAX_STRING_LOG];
-    int actionNum = 0;
->>>>>>> 51239f8a9f362b751551ea21e5ee809fcaca9cd5
 
     // get key for shared memory
     shmem_key = ftok(".", 16535);
     if(shmem_key == -1)
     {
-        printf("(DX) Cannot allocate key\n");
+        //printf("(DX) Cannot allocate key\n");
+        dlog(DATA_CORRUPTOR,semid,"(DX) Cannot allocate key!");
         // remove semaphore
         semctl (semid, 0, IPC_RMID,0);
         exit(3);
@@ -103,18 +94,19 @@ int wod(int shmid, int semid)
     p = (MasterList *)shmat (shmid, NULL, 0);
     if(p == NULL)
     {
-        printf("(DX)Cannot attach to shared memory!\n");
+        dlog(DATA_CORRUPTOR,semid,"(DX)Cannot attach to shared memory!");
+        //printf("(DX)Cannot attach to shared memory!\n");
         return -1;
     }
 
     actionNum++;
     //Step1: sleep for a random amount of time (10 ~ 30)
     r = (rand() % 21) + 10;
-    printf("(Logger) sleep1 %d\n",r);
+    //printf("(Logger) sleep1 %d\n",r);
     sleep(r);
     //Step2 : check for the existance of the message queue
     mid = p->msgQueueID;
-    printf("(Logger) msgQueueID %d\n",mid);
+    //printf("(Logger) msgQueueID %d\n",mid);
 
     if(mid == 0)
     {
@@ -122,7 +114,7 @@ int wod(int shmid, int semid)
         shmdt (p);
         // remove shared memory
         shmctl(shmid,IPC_RMID,0);
-        printf("DX deteched that msgQ is gone - assuming DR/DCs done\n");
+        //printf("DX deteched that msgQ is gone - assuming DR/DCs done\n");
         // print log file
         dlog(DATA_CORRUPTOR,semid,"DX deteched that msgQ is gone - assuming DR/DCs done");
         // remove semaphore
@@ -140,7 +132,7 @@ int wod(int shmid, int semid)
         case DO_NOTING:
             {
                 // log do notiong
-                printf("do nothing\n");
+                //printf("do nothing\n");
                 dlog(DATA_CORRUPTOR,semid,"do nothing");
                 break;
             }
@@ -150,7 +142,7 @@ int wod(int shmid, int semid)
                 pid = (p->dc[r]).dcProcessID;
                 kill(pid, SIGHUP);
                 // log kill dc
-                printf("WOD Action %02d - DC-%02d [%u] TERMINATED\n",actionNum, r, pid);
+                //printf("WOD Action %02d - DC-%02d [%u] TERMINATED\n",actionNum, r, pid);
                 sprintf(temp,"WOD Action %02d - DC-%02d [%u] TERMINATED",actionNum, r, pid);
                 dlog(DATA_CORRUPTOR,semid,temp);
                 break;
@@ -159,7 +151,7 @@ int wod(int shmid, int semid)
             {
                 // log delete message queue
                 msgctl (mid, IPC_RMID, NULL);
-                printf("DX deleted the msgQ - the DR/DCs can't talk anymore - exiting\n");
+                //printf("DX deleted the msgQ - the DR/DCs can't talk anymore - exiting\n");
                 dlog(DATA_CORRUPTOR,semid,"DX deleted the msgQ - the DR/DCs can't talk anymore - exiting");
                 break;
             }
