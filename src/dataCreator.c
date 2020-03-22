@@ -9,7 +9,6 @@
  *               It sends such a message on a random time basis.
  * 
  */
-#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +22,6 @@
 #include "../inc/dataCreator.h"
 #include "../inc/msgQueue.h"
 #include "../inc/dataLogger.h"
-#include "../inc/debug.h"
 
 int main (void)
 {
@@ -74,7 +72,6 @@ int main (void)
             dlog(DATA_CREATOR, semId, "DC - EROOR: cannot send any message");
             return -4;
         }
-        dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 
         // logging the activity of sending a message
         sprintf (strLog, "DC [%d] - MSG SENT - Satus %d (%s)", 

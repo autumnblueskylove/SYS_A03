@@ -74,12 +74,12 @@ int main (void)
             dlog(DATA_CREATOR, semId, "DC - EROOR: cannot send any message");
             return -4;
         }
-        dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 
         // logging the activity of sending a message
         sprintf (strLog, "DC [%d] - MSG SENT - Satus %d (%s)", 
             sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
         dlog(DATA_CREATOR, semId, strLog);
+        dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 
         if(eMsgStatus != OFF_LINE)                              // status 1 ~ 5
         {
