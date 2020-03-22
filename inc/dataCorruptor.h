@@ -18,9 +18,8 @@
 #include <unistd.h>
 #include "../inc/shdMemory.h"
 
-#define     MAX_DC_ROLES    10
+#define     KILL_DC         1                   // to kill a client
+#define     DELETE_MSGQ     2                   // to delete message queue
 #define     DO_NOTING       0
-#define     KILL_DC         1
-#define     DELETE_MSGQ     2
 
 int wod(int shmid, int semid);
