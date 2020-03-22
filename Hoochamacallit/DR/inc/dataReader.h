@@ -8,8 +8,8 @@
  */
 
 #include <time.h>
-#include "../inc/msgQueue.h"
-#include "../inc/shdMemory.h"
+#include "../../Common/inc/msgQueue.h"
+#include "../../Common/inc/shdMemory.h"
 
 #define LOOP_FOREVER                1               // for an infinite loop
 #define TIME_OUT                    35              // for non-responsive clients
