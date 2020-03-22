@@ -16,7 +16,7 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <unistd.h>
-#include "../inc/shdMemory.h"
+#include "../../Common/inc/shdMemory.h"
 
 #define LOOP_FOREVER                    1       // for an infinite loop
 #define KILL_DC                         1       // to kill a client

@@ -15,7 +15,7 @@
 
 #include <sys/sem.h>
 #include "../inc/dataCorruptor.h"
-#include "../inc/dataLogger.h"
+#include "../../Common/inc/dataLogger.h"
 
 int main() 
 {
@@ -76,7 +76,6 @@ int main()
     return 0;
 }
 
-<<<<<<< HEAD
 /* =============================================================================*/
 /* Name		: wod                              								    */
 /* PURPOSE  : to do exceptional test, kill process, delete message queue	    */
@@ -87,15 +86,6 @@ int main()
 /*                                     0 :  DX deteched that msgQ is gone       */
 /*                                     1 :  success                             */
 /* =============================================================================*/
-=======
-/*
- * Function		: wod()
- * Description	: This function is to log each action of DC, DR, and DX Application.
- * Parameters	: int shmid 		: shared memory ID
- *                int semid 	    : semaphore ID for cretical section 
- * Returns		: int
- */
->>>>>>> 6e42940c34562a203c19e7933591306789fa5239
 int wod(int shmid, int semid)
 {
     int     actionNum = 0;

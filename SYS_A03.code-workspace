@@ -10,7 +10,9 @@
 			"shdmemory.h": "c",
 			"datacreator.h": "c",
 			"msgqueue.h": "c",
-			"datalogger.h": "c"
+			"datalogger.h": "c",
+			"datareader.h": "c",
+			"datacorruptor.h": "c"
 		}
 	}
 }

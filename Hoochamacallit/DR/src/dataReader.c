@@ -21,7 +21,7 @@
 #include <sys/shm.h>
 #include <sys/sem.h>
 #include "../inc/dataReader.h"
-#include "../inc/dataLogger.h"
+#include "../../Common/inc/dataLogger.h"
 
 int main (void)
 {

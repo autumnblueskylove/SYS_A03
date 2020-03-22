@@ -20,8 +20,8 @@
 #include <sys/msg.h>
 #include <sys/sem.h>
 #include "../inc/dataCreator.h"
-#include "../inc/msgQueue.h"
-#include "../inc/dataLogger.h"
+#include "../../Common/inc/msgQueue.h"
+#include "../../Common/inc/dataLogger.h"
 
 int main (void)
 {

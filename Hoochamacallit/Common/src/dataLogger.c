@@ -34,14 +34,6 @@
 /* RETURNS  : Nothing															*/
 /* =============================================================================*/
 
-/*
- * Function		: dlog()
- * Description	: This function is to log each action of DC, DR, and DX Application.
- * Parameters	: int progID 		: program ID of DC, DR, and DX  
- *                int semid 	    : semaphore ID for cretical section 
- * 				  char contents[]   : message for writting log files  
- * Returns		: nothing
- */
 void dlog(int progID, int semid, char contents[MAX_STRING_LOG])
 {
     char filePath[MAX_STRING_LOG] = {""};
