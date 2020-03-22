@@ -102,11 +102,11 @@ int wod(int shmid, int semid)
 
     actionNum++;
 
-    // step1: sleep for a random amount of time (10 ~ 30)
+    // step1: sleeping for a random amount of time (10 ~ 30)
     srand(time(0));
     sleep((rand() % TIME_RANGE_SLEEP) + TIME_MIN_SLEEP);// integer: 10 to 30
 
-    // step2 : check for the existance of the message queue
+    // step2 : checking for the existance of the message queue
     mid = p->msgQueueID;
 
     if(mid == 0)
@@ -130,23 +130,20 @@ int wod(int shmid, int semid)
     switch(r)
     {
         case DO_NOTING:
-            // log do notiong
-            //printf("do nothing\n");
+            // logging, doing notiong
             dlog(DATA_CORRUPTOR,semid,"do nothing");
             break;
         case KILL_DC:
             r = rand() % (p->numberOfDCs);
             pid = (p->dc[r]).dcProcessID;
             kill(pid, SIGHUP);
-            // log kill dc
-            //printf("WOD Action %02d - DC-%02d [%u] TERMINATED\n",actionNum, r, pid);
+            // logging, killing dc
             sprintf(temp,"WOD Action %02d - DC-%02d [%u] TERMINATED",actionNum, r, pid);
             dlog(DATA_CORRUPTOR,semid,temp);
             break;
         case DELETE_MSGQ:
-            // log delete message queue
+            // loging, deleting message queue
             msgctl (mid, IPC_RMID, NULL);
-            //printf("DX deleted the msgQ - the DR/DCs can't talk anymore - exiting\n");
             dlog(DATA_CORRUPTOR,semid,"DX deleted the msgQ - the DR/DCs can't talk anymore - exiting");
             break;
         default:
