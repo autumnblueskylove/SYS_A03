@@ -9,7 +9,6 @@
  *               It sends such a message on a random time basis.
  * 
  */
-#define DEBUG 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,9 +20,8 @@
 #include <sys/msg.h>
 #include <sys/sem.h>
 #include "../inc/dataCreator.h"
-#include "../../Common/inc/msgQueue.h"
-#include "../../Common/inc/dataLogger.h"
-#include "../../Common/inc/debug.h"
+#include "../inc/msgQueue.h"
+#include "../inc/dataLogger.h"
 
 int main (void)
 {
@@ -79,7 +77,6 @@ int main (void)
         sprintf (strLog, "DC [%d] - MSG SENT - Satus %d (%s)", 
             sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
         dlog(DATA_CREATOR, semId, strLog);
-        dp("[send] pID: %d, status: %d\n", sMsgData.processID, sMsgData.msgStatus);
 
         if(eMsgStatus != OFF_LINE)                              // status 1 ~ 5
         {

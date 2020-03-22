@@ -10,7 +10,7 @@
 #ifndef __SHD_MEMORY_H__
 #define __SHD_MEMORY_H__
 
-#define MAX_DC_ROLES                    10          // the maximum number of clients
+#define MAX_DC_ROLES                10          // the maximum number of clients
 
 typedef struct
 {
