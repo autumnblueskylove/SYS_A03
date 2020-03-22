@@ -11,7 +11,7 @@
 # =======================================================
 #                     Dependencies
 # =======================================================                     
-../obj/dr.o : ../src/dataCreator.c ../inc/dataCreator.h 
+../obj/dc.o : ../src/dataCreator.c ../inc/dataCreator.h 
 	cc -c ../src/dataCreator.c -o ../obj/dc.o
 
 ../obj/logger.o :  ../../Common/src/dataLogger.c   ../../Common/inc/dataLogger.h
