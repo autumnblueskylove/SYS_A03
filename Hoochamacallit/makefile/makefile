@@ -1,3 +1,6 @@
+#
+# this makefile will compile and link the all applications and move to common/bin folder
+# 
 default:
 	$(MAKE) -C ../DR/makefile
 	$(MAKE) -C ../DC/makefile
