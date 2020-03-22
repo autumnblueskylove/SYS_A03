@@ -139,7 +139,10 @@ int main (void)
 		// 3rd operation, checking if all clients are removed from the list
 		if(pMasterList->numberOfDCs == 0)
 		{
-			///log: The total number of machines reaches zero, then TERMINATING
+			// logging the event of TERMINATING because the total number of machines reaches zero
+			dlog(DATA_MONITOR, semId, "All DCs have gone offline or terminated - DR TERMINATING");
+			dp("[terminate] totalClient: %d\n", pMasterList->numberOfDCs);
+
 			break;
 		}
 
@@ -229,11 +232,14 @@ void OperationNonResponsive(MasterList *pMasterList, int semId)
 		}
 		if(orderNonResponsiveClient > 0)
 		{
+			int dcProcessID = pMasterList->dc[orderNonResponsiveClient - 1].dcProcessID;
+			
+			// removing
 			RemoveAndCollapse(orderNonResponsiveClient, pMasterList, semId);
 
 			// logging the activity of removing the element from the list (non-responsive)
 			sprintf (strLog, "DC-%02d [%d] removed from master list - NON-RESPONSIVE", 
-				orderNonResponsiveClient, pMasterList->dc[orderNonResponsiveClient - 1].dcProcessID);
+				orderNonResponsiveClient, dcProcessID);
 			dlog(DATA_MONITOR, semId, strLog);
 			dp("[remove] dc1-indexedID: %d, totalClient: %d\n", orderNonResponsiveClient, pMasterList->numberOfDCs);
 		}
