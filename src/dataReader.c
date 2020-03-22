@@ -268,7 +268,7 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 
 	if(orderIncomingClient == 0)					// new client
 	{
-		if(pMasterList->numberOfDCs != MAX_DC_ROLES)
+		if(pMasterList->numberOfDCs < MAX_DC_ROLES)
 		{
 			// adding
 			pMasterList->dc[pMasterList->numberOfDCs].dcProcessID = sMsgData.processID;
@@ -277,10 +277,10 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 
 			// logging the activity of adding a new element to the list
 			sprintf (strLog, "DC-%02d [%d] added to the master list - NEW DC - Status %d (%s)", 
-				orderIncomingClient + 1, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+				pMasterList->numberOfDCs - 1, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
 			dlog(DATA_MONITOR, semId, strLog);
 		}
-		else
+		else										// over maximum clients
 		{
 			// by-passing
 		}
