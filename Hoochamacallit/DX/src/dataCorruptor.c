@@ -15,7 +15,7 @@
 
 #include <sys/sem.h>
 #include "../inc/dataCorruptor.h"
-#include "../inc/dataLogger.h"
+#include "../../Common/inc/dataLogger.h"
 
 int main() 
 {

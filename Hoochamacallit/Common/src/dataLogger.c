@@ -21,7 +21,7 @@
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <time.h>
-#include "../inc/dataLogger.h"
+#include "../../Common/inc/dataLogger.h"
 
 
 // int main ()

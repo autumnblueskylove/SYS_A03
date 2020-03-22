@@ -16,7 +16,7 @@
 #include <sys/msg.h>
 #include <signal.h>
 #include <unistd.h>
-#include "../inc/shdMemory.h"
+#include "../../Common/inc/shdMemory.h"
 
 #define     MAX_DC_ROLES    10
 #define     DO_NOTING       0

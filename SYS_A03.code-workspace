@@ -7,7 +7,10 @@
 	"settings": {
 		"files.associations": {
 			"stdio.h": "c",
-			"shdmemory.h": "c"
+			"shdmemory.h": "c",
+			"datacreator.h": "c",
+			"msgqueue.h": "c",
+			"datalogger.h": "c"
 		}
 	}
 }
