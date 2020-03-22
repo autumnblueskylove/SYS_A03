@@ -279,7 +279,7 @@ void OperationIncomming(MasterList *pMasterList, MessageData sMsgData, time_t t,
 
 		// logging the activity of adding a new element to the list
 		sprintf (strLog, "DC-%02d [%d] added to the master list - NEW DC - Status %d (%s)", 
-			orderIncomingClient, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
+			orderIncomingClient + 1, sMsgData.processID, sMsgData.msgStatus, kDescriptionStatus[sMsgData.msgStatus]);
 		dlog(DATA_MONITOR, semId, strLog);
 		dp("[add] dc1-indexedID: %d, totalClient: %d\n", orderIncomingClient + 1, pMasterList->numberOfDCs);
 	}
