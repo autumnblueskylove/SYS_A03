@@ -11,7 +11,9 @@ as such, the server and all of the production machines will be actually running 
 > > > In order to complete this simulator, you need to create an application suite (a system) that consists of three
 distinct processing components:  
 > > > >•  a "data creator" (DC) application – call the application DC.  This models the production machine. 
+> > > >
 > > > >•  a "data reader" (DR) application – call the application DR.  This models the server. 
+> > > >
 > > > >•  a “data corruptor” (DX) application – call the application DX.  This acts as a stress testing module. 
 
 > > > In this system’s development, you will design and implement the data creator application, the data reader 
